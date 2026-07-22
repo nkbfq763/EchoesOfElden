@@ -28,18 +28,24 @@ const SCREEN_NEIGHBORS: Dictionary = {
 const SOLID_CHANNEL_THRESHOLD := 0.2
 const SOLID_ALPHA_THRESHOLD := 0.5
 const MASK_POLYGON_EPSILON := 2.5
+const EDGE_TRIGGER_DISTANCE := 4.0
+const ENTRY_MARGIN := 28.0
+const TRANSITION_COOLDOWN := 0.35
 
 @onready var background: Sprite2D = $BackgroundLayer/Background
 @onready var object_layer: Node2D = $ObjectLayer
 @onready var collision_layer: Node2D = $CollisionLayer
-@onready var camera: Camera2D = $Camera2D
+@onready var player: CharacterBody2D = $FieldPlayer
+@onready var camera: Camera2D = $FieldPlayer/Camera2D
 
 var current_screen_id := "bg_screen_a"
+var _player_initialized := false
+var _transition_cooldown := 0.0
 
 func _ready() -> void:
 	load_screen("bg_screen_a")
 
-func load_screen(screen_id: String) -> void:
+func load_screen(screen_id: String, entry_direction: String = "") -> void:
 	var meta := _load_screen_metadata(screen_id)
 	if meta.is_empty():
 		return
@@ -59,13 +65,20 @@ func load_screen(screen_id: String) -> void:
 		_load_object(object_data)
 
 	_configure_camera(screen_id)
+	if not _player_initialized:
+		player.position = _screen_size(screen_id) * 0.5
+		_player_initialized = true
+	elif not entry_direction.is_empty():
+		_place_player_at_entry(screen_id, entry_direction)
 
 func change_screen(direction: String) -> void:
 	var neighbors: Dictionary = SCREEN_NEIGHBORS.get(current_screen_id, {})
 	var next_screen: String = str(neighbors.get(direction, ""))
 	if next_screen.is_empty():
 		return
-	load_screen(next_screen)
+	player.stop_movement()
+	load_screen(next_screen, _opposite_direction(direction))
+	_transition_cooldown = TRANSITION_COOLDOWN
 
 func generate_polygon_from_mask(mask_path: String) -> Array[PackedVector2Array]:
 	var image := _load_image(mask_path)
@@ -161,13 +174,71 @@ func _object_z_index(sprite: Sprite2D) -> int:
 	return roundi(sprite.position.y + sprite.texture.get_height() * sprite.scale.y)
 
 func _configure_camera(screen_id: String) -> void:
-	var size: Vector2i = SCREEN_SIZE.get(screen_id, Vector2i(500, 500))
-	camera.position = Vector2(size) * 0.5
+	var size := _screen_size(screen_id)
+	camera.position = Vector2.ZERO
 	camera.limit_left = 0
 	camera.limit_top = 0
 	camera.limit_right = size.x
 	camera.limit_bottom = size.y
 	camera.enabled = true
+
+func _screen_size(screen_id: String) -> Vector2i:
+	return SCREEN_SIZE.get(screen_id, Vector2i(500, 500))
+
+func _place_player_at_entry(screen_id: String, entry_direction: String) -> void:
+	var size := Vector2(_screen_size(screen_id))
+	var position := player.position
+	match entry_direction:
+		"left":
+			position.x = ENTRY_MARGIN
+			position.y = clampf(position.y, ENTRY_MARGIN, size.y - ENTRY_MARGIN)
+		"right":
+			position.x = size.x - ENTRY_MARGIN
+			position.y = clampf(position.y, ENTRY_MARGIN, size.y - ENTRY_MARGIN)
+		"up":
+			position.y = ENTRY_MARGIN
+			position.x = clampf(position.x, ENTRY_MARGIN, size.x - ENTRY_MARGIN)
+		"down":
+			position.y = size.y - ENTRY_MARGIN
+			position.x = clampf(position.x, ENTRY_MARGIN, size.x - ENTRY_MARGIN)
+	player.position = position
+
+func _opposite_direction(direction: String) -> String:
+	match direction:
+		"left":
+			return "right"
+		"right":
+			return "left"
+		"up":
+			return "down"
+		"down":
+			return "up"
+	return ""
+
+func _process(delta: float) -> void:
+	if _transition_cooldown > 0.0:
+		_transition_cooldown = maxf(0.0, _transition_cooldown - delta)
+		return
+	var direction := _get_edge_direction()
+	if direction.is_empty():
+		return
+	var neighbors: Dictionary = SCREEN_NEIGHBORS.get(current_screen_id, {})
+	if not neighbors.has(direction):
+		return
+	change_screen(direction)
+
+func _get_edge_direction() -> String:
+	var size := Vector2(_screen_size(current_screen_id))
+	var position := player.position
+	if position.x <= EDGE_TRIGGER_DISTANCE:
+		return "left"
+	if position.x >= size.x - EDGE_TRIGGER_DISTANCE:
+		return "right"
+	if position.y <= EDGE_TRIGGER_DISTANCE:
+		return "up"
+	if position.y >= size.y - EDGE_TRIGGER_DISTANCE:
+		return "down"
+	return ""
 
 func _clear_layer(layer: Node2D) -> void:
 	for child in layer.get_children():
@@ -182,13 +253,3 @@ func _load_image(path: String) -> Image:
 	if image.load(path) == OK:
 		return image
 	return Image.new()
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_right"):
-		change_screen("right")
-	elif event.is_action_pressed("ui_left"):
-		change_screen("left")
-	elif event.is_action_pressed("ui_up"):
-		change_screen("up")
-	elif event.is_action_pressed("ui_down"):
-		change_screen("down")
