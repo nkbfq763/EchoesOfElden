@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://d4gtcrc2cbwfp"]
+
+[ext_resource type="Script" uid="uid://bqvxb4abafpi1" path="res://scripts/generate_eterna_heightmap.gd" id="1_3hwru"]
+
+[node name="GenerateHeightMap" type="Generic6DOFJoint3D" unique_id=2053103894]
+script = ExtResource("1_3hwru")

@@ -1,0 +1,20 @@
+{
+  "map_id": "s001_elden_village",
+  "name": "Elden Village",
+  "type": "settlement",
+  "encounter_enabled": true,
+
+  "screens": [
+    "bg_screen_a",
+    "bg_screen_b",
+    "bg_screen_c",
+    "bg_screen_d"
+  ],
+
+  "meta_paths": {
+    "bg_screen_a": "res://assets/maps/settlements/s001_elden_village/meta/bg_screen_a.json",
+    "bg_screen_b": "res://assets/maps/settlements/s001_elden_village/meta/bg_screen_b.json",
+    "bg_screen_c": "res://assets/maps/settlements/s001_elden_village/meta/bg_screen_c.json",
+    "bg_screen_d": "res://assets/maps/settlements/s001_elden_village/meta/bg_screen_d.json"
+  }
+}

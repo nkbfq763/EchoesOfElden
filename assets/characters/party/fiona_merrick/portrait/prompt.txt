@@ -1,0 +1,9 @@
+[positive]
+masterpiece, best quality, sharp focus,
+anime style, JRPG heroine, childhood friend of the protagonist, 
+gentle and bright personality,  
+long soft chestnut hair tied with a ribbon, fantasy design,Tales of series style,
+1girl, looking_at_viewer
+expressive eyes, clear green eyes,
+(closed eyes:1.2)
+//表情

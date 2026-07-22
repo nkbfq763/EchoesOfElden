@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://character_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+character_name = "Roland Hartwell"
+character_type = "hero"
+speed = 150.0
+health = 120
+defense = 4
+max_tp = 40
+attack = 14

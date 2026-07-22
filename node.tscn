@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c8s3jp3wwv8nj"]
+
+[ext_resource type="Script" uid="uid://cgg45epuke7xq" path="res://scripts/extract_objects_from_mask.gd" id="1_sy5k4"]
+
+[node name="Node" type="Node" unique_id=1077429790]
+script = ExtResource("1_sy5k4")

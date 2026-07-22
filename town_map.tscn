@@ -1,0 +1,84 @@
+[gd_scene load_steps=13 format=3 uid="uid://town_map"]
+
+[ext_resource type="Script" path="res://town_map.gd" id="1_town_map"]
+[ext_resource type="Texture2D" path="res://assets/town/elden/square.png" id="2_square"]
+
+[sub_resource type="RectangleShape2D" id="TopSceneryShape"]
+size = Vector2(1536, 290)
+
+[sub_resource type="RectangleShape2D" id="LeftSceneryShape"]
+size = Vector2(500, 250)
+
+[sub_resource type="RectangleShape2D" id="RightSceneryShape"]
+size = Vector2(500, 250)
+
+[sub_resource type="RectangleShape2D" id="LeftPondShape"]
+size = Vector2(260, 150)
+
+[sub_resource type="RectangleShape2D" id="RightPondShape"]
+size = Vector2(260, 150)
+
+[sub_resource type="RectangleShape2D" id="LeftEdgeShape"]
+size = Vector2(28, 1024)
+
+[sub_resource type="RectangleShape2D" id="RightEdgeShape"]
+size = Vector2(28, 1024)
+
+[sub_resource type="RectangleShape2D" id="BottomEdgeShape"]
+size = Vector2(1536, 28)
+
+[node name="TownMap" type="Node2D"]
+script = ExtResource("1_town_map")
+
+[node name="Background" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("2_square")
+centered = false
+
+[node name="TopSceneryCollision" type="StaticBody2D" parent="."]
+position = Vector2(768, 145)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopSceneryCollision"]
+shape = SubResource("TopSceneryShape")
+
+[node name="LeftSceneryCollision" type="StaticBody2D" parent="."]
+position = Vector2(250, 430)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftSceneryCollision"]
+shape = SubResource("LeftSceneryShape")
+
+[node name="RightSceneryCollision" type="StaticBody2D" parent="."]
+position = Vector2(1286, 430)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightSceneryCollision"]
+shape = SubResource("RightSceneryShape")
+
+[node name="LeftPondCollision" type="StaticBody2D" parent="."]
+position = Vector2(350, 790)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftPondCollision"]
+shape = SubResource("LeftPondShape")
+
+[node name="RightPondCollision" type="StaticBody2D" parent="."]
+position = Vector2(1186, 790)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightPondCollision"]
+shape = SubResource("RightPondShape")
+
+[node name="LeftEdgeCollision" type="StaticBody2D" parent="."]
+position = Vector2(14, 512)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftEdgeCollision"]
+shape = SubResource("LeftEdgeShape")
+
+[node name="RightEdgeCollision" type="StaticBody2D" parent="."]
+position = Vector2(1522, 512)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightEdgeCollision"]
+shape = SubResource("RightEdgeShape")
+
+[node name="BottomEdgeCollision" type="StaticBody2D" parent="."]
+position = Vector2(768, 1010)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BottomEdgeCollision"]
+shape = SubResource("BottomEdgeShape")
