@@ -1,0 +1,24 @@
+{
+  "screen_id": "bg_screen_a",
+  "background": "res://assets/maps/settlements/s001_elden_village/background/bg_screen_a.png",
+  "objects": [
+    {
+      "id": "barn",
+      "object_ref": "res://assets/maps/settlements/s001_elden_village/objects/barn.png",
+      "mask_ref": "res://assets/maps/settlements/s001_elden_village/masks/barn_mask.png",
+      "position": { "x": 125, "y": 150 },
+      "scale": 0.5,
+      "collision": true,
+      "category": "SolidOnly"
+    },
+    {
+      "id": "house_a",
+      "object_ref": "res://assets/maps/settlements/s001_elden_village/objects/house_a.png",
+      "mask_ref": "res://assets/maps/settlements/s001_elden_village/masks/house_a_mask.png",
+      "position": { "x": 370, "y": 175 },
+      "scale": 0.5,
+      "collision": true,
+      "category": "SolidOnly"
+    }
+  ]
+}

@@ -12,7 +12,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
 		step += 1
 		if step >= 3:
-			get_tree().change_scene_to_file("res://main.tscn")
+			get_tree().change_scene_to_file("res://EldenVillage.tscn")
 		else:
 			_update_step()
 
