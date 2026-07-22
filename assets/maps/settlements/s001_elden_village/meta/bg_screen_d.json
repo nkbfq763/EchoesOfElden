@@ -1,0 +1,24 @@
+{
+  "screen_id": "bg_screen_d",
+  "background": "res://assets/maps/settlements/s001_elden_village/background/bg_screen_d.png",
+  "objects": [
+    {
+      "id": "house_c",
+      "object_ref": "res://assets/maps/settlements/s001_elden_village/objects/house_c.png",
+      "mask_ref": "res://assets/maps/settlements/s001_elden_village/masks/house_c_mask.png",
+      "position": { "x": 250, "y": 185 },
+      "scale": 0.45,
+      "collision": true,
+      "category": "SideStructure"
+    },
+    {
+      "id": "fence_a",
+      "object_ref": "res://assets/maps/settlements/s001_elden_village/objects/fence_a.png",
+      "mask_ref": "res://assets/maps/settlements/s001_elden_village/masks/fence_a_mask.png",
+      "position": { "x": 165, "y": 355 },
+      "scale": 0.5,
+      "collision": true,
+      "category": "SolidOnly"
+    }
+  ]
+}

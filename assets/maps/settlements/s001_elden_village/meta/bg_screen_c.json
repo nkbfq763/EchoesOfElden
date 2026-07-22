@@ -1,0 +1,15 @@
+{
+  "screen_id": "bg_screen_c",
+  "background": "res://assets/maps/settlements/s001_elden_village/background/bg_screen_c.png",
+  "objects": [
+    {
+      "id": "well",
+      "object_ref": "res://assets/maps/settlements/s001_elden_village/objects/well.png",
+      "mask_ref": "res://assets/maps/settlements/s001_elden_village/masks/well_mask.png",
+      "position": { "x": 250, "y": 275 },
+      "scale": 0.5,
+      "collision": true,
+      "category": "SideStructure"
+    }
+  ]
+}
