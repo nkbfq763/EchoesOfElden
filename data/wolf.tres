@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/enemy_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+enemy_name = "Wolf"
+max_hp = 42
+attack = 10
+defense = 3
+exp = 12
+gald = 14
+attack_interval = 1.7
+aggression = 1.25
+move_speed = 58.0
+animations_path = "res://assets/characters/enemies/wolf/animations"
+battle_bg = "res://assets/maps/battle_maps/battle_bg_forest.png"

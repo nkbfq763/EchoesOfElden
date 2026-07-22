@@ -6,6 +6,14 @@ enum EnemyAIState { APPROACH, TELEGRAPH, ATTACK, RECOVER, REPOSITION }
 const MELEE_RANGE := 78.0
 const HEIGHT_RANGE := 30.0
 const COMBO_TIMEOUT := 1.25
+const ELEMENT_MULTIPLIERS: Dictionary = {
+	"none": 1.0,
+	"fire": 1.1,
+	"ice": 0.9,
+	"lightning": 1.0,
+}
+const EMBER_BLADE: SkillData = preload("res://data/skill_ember_blade.tres")
+const FIREBALL: SkillData = preload("res://data/skill_fireball.tres")
 
 var state := BattleState.ACTIVE
 var hero: BattleUnit
@@ -20,31 +28,42 @@ var guard_regen_timer := 0.0
 var result_label: Label
 var combo_label: Label
 var status_label: Label
+var cast_progress: ProgressBar
 
 func _ready() -> void:
-	_set_battle_background(GameData.battle_background)
 	hero_data = GameData.get_character_data()
 	if not hero_data:
-		hero_data = load("res://data/hero.tres")
+		hero_data = load("res://data/hero.tres") as CharacterData
 		GameData.set_character_data(hero_data)
 	hero_data.reset_for_battle()
 	_create_hero()
-	var encounter := GameData.pending_encounter.duplicate()
+	var encounter: Array = GameData.pending_encounter.duplicate()
 	if encounter.is_empty():
 		encounter = [load("res://data/slime.tres")]
+	_set_battle_background(_encounter_background(encounter))
 	for index in encounter.size():
 		_create_enemy(encounter[index], index)
 	active_target = enemies[0] if not enemies.is_empty() else null
 	result_label = $Result
 	combo_label = $Combo
 	status_label = $Status
+	cast_progress = $CastProgress
 	_update_target_marker()
 	_refresh_ui()
+
+func _encounter_background(encounter: Array) -> String:
+	for data in encounter:
+		var background := str(data.get("battle_bg"))
+		if not background.is_empty():
+			return background
+	if not GameData.battle_background.is_empty():
+		return GameData.battle_background
+	return "res://assets/maps/battle_maps/battle_bg_plains.png"
 
 func _set_battle_background(path: String) -> void:
 	var texture := load(path) as Texture2D
 	if not texture:
-		texture = load("res://assets/backgrounds/battle_bg_plains.png") as Texture2D
+		texture = load("res://assets/maps/battle_maps/battle_bg_plains.png") as Texture2D
 	$Background.texture = texture
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -54,6 +73,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("attack"):
 		hero.request_attack()
+	elif event.is_action_pressed("tech"):
+		_try_tech()
+	elif event.is_action_pressed("cast"):
+		_try_cast()
 	elif event.is_action_pressed("jump"):
 		hero.request_jump()
 	elif event.is_action_pressed("step"):
@@ -87,6 +110,7 @@ func _create_hero() -> void:
 	add_child(hero)
 	hero.configure(hero_data, false, Vector2(155, 270))
 	hero.attack_window.connect(_on_attack_window)
+	hero.cast_completed.connect(_on_cast_completed)
 	hero.state_changed.connect(_on_unit_state_changed)
 
 func _create_enemy(data: EnemyData, index: int) -> void:
@@ -146,6 +170,22 @@ func _process_enemy_ai(delta: float) -> void:
 					record["state"] = EnemyAIState.APPROACH
 		enemy.face_target(hero)
 
+func _try_tech() -> void:
+	if hero_data.current_tp < EMBER_BLADE.tp_cost:
+		status_label.text = "Not enough TP for %s." % EMBER_BLADE.skill_name
+		return
+	if hero.request_tech(EMBER_BLADE):
+		hero_data.current_tp -= EMBER_BLADE.tp_cost
+		status_label.text = "%s!" % EMBER_BLADE.skill_name
+
+func _try_cast() -> void:
+	if hero_data.current_tp < FIREBALL.tp_cost:
+		status_label.text = "Not enough TP for %s." % FIREBALL.skill_name
+		return
+	if hero.request_cast(FIREBALL):
+		hero_data.current_tp -= FIREBALL.tp_cost
+		status_label.text = "Casting %s..." % FIREBALL.skill_name
+
 func _on_attack_window(attacker: BattleUnit) -> void:
 	var defender := active_target if attacker == hero else hero
 	if not defender or defender.current_hp <= 0:
@@ -155,7 +195,11 @@ func _on_attack_window(attacker: BattleUnit) -> void:
 	if not _is_melee_hit(attacker, defender):
 		return
 	attacker.attack_hit_targets.append(defender)
-	var damage := _calculate_damage(attacker, defender)
+	var skill_power := attacker.get_attack_power()
+	var element := "none"
+	if attacker.active_skill:
+		element = str(attacker.active_skill.get("element"))
+	var damage := _calculate_damage(attacker, defender, skill_power, element)
 	if defender == hero and hero.is_guarding() and _is_front_hit(defender, attacker):
 		damage = maxi(1, int(round(damage * 0.3)))
 		hero_data.current_tp = mini(hero_data.max_tp, hero_data.current_tp + 2)
@@ -165,13 +209,40 @@ func _on_attack_window(attacker: BattleUnit) -> void:
 	combo_hits += 1
 	combo_timer = COMBO_TIMEOUT
 	status_label.text = "%s hit for %d damage!" % [attacker.name, damage]
+	_spawn_damage_number(defender, damage)
 	_refresh_ui()
 
-func _calculate_damage(attacker: BattleUnit, defender: BattleUnit) -> int:
-	var raw := float(attacker.get_attack()) * attacker.get_attack_power() - float(defender.get_defense())
-	var combo_multiplier := 1.0 + minf(combo_hits * 0.01, 0.3)
-	var damage := maxf(1.0, raw * combo_multiplier)
-	return maxi(1, int(floor(damage * randf_range(0.95, 1.05))))
+func _on_cast_completed(caster: BattleUnit, skill: Resource) -> void:
+	if caster != hero or not active_target or active_target.current_hp <= 0:
+		return
+	var damage := _calculate_damage(hero, active_target, float(skill.get("power")), str(skill.get("element")))
+	active_target.receive_damage(damage)
+	combo_hits += 1
+	combo_timer = COMBO_TIMEOUT
+	status_label.text = "%s dealt %d damage!" % [skill.get("skill_name"), damage]
+	_spawn_damage_number(active_target, damage)
+
+func _calculate_damage(
+	attacker: BattleUnit,
+	defender: BattleUnit,
+	skill_power: float,
+	element: String
+) -> int:
+	return calculate_damage_with_roll(attacker, defender, skill_power, element, randi_range(-5, 5))
+
+func calculate_damage_with_roll(
+	attacker: BattleUnit,
+	defender: BattleUnit,
+	skill_power: float,
+	element: String,
+	random_roll: int
+) -> int:
+	var base := float(attacker.get_attack()) * skill_power
+	var raw := base - float(defender.get_defense())
+	var element_multiplier := float(ELEMENT_MULTIPLIERS.get(element, 1.0))
+	var elem := raw * element_multiplier
+	var combo := elem * (1.0 + minf(combo_hits * 0.01, 0.3))
+	return maxi(1, floori(combo) + random_roll)
 
 func _is_melee_hit(attacker: BattleUnit, defender: BattleUnit) -> bool:
 	if absf(attacker.position.x - defender.position.x) > MELEE_RANGE:
@@ -220,10 +291,29 @@ func _update_target_marker() -> void:
 
 func _refresh_ui() -> void:
 	combo_label.text = "%d HIT" % combo_hits if combo_hits > 0 else ""
+	if hero and hero.state == BattleUnit.State.CAST:
+		cast_progress.visible = true
+		cast_progress.value = hero.get_cast_progress() * 100.0
+	else:
+		cast_progress.visible = false
 	for index in enemies.size():
 		var enemy := enemies[index]
 		var label: Label = $EnemyList.get_child(index)
 		label.text = "%s  HP %d/%d" % [enemy.unit_data.get("enemy_name"), enemy.current_hp, enemy.max_hp]
+
+func _spawn_damage_number(target_unit: BattleUnit, damage: int) -> void:
+	var label := Label.new()
+	label.text = str(damage)
+	label.position = target_unit.position + Vector2(-12, -105)
+	label.modulate = Color(1.0, 0.9, 0.35, 1.0)
+	label.add_theme_font_size_override("font_size", 18)
+	add_child(label)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(label, "position:y", label.position.y - 28.0, 0.55)
+	tween.tween_property(label, "modulate:a", 0.0, 0.55)
+	tween.set_parallel(false)
+	tween.tween_callback(label.queue_free)
 
 func _check_battle_result() -> void:
 	if hero.current_hp <= 0:
@@ -236,12 +326,15 @@ func _check_battle_result() -> void:
 		if enemy.current_hp > 0:
 			return
 	state = BattleState.RESULT
-	var reward := 0
+	var reward_gald := 0
+	var reward_exp := 0
 	for enemy in enemies:
-		reward += int(enemy.unit_data.get("gald"))
-	GameData.gald += reward
+		reward_gald += int(enemy.unit_data.get("gald"))
+		reward_exp += int(enemy.unit_data.get("exp"))
+	GameData.gald += reward_gald
+	GameData.exp += reward_exp
 	GameData.finish_battle(true)
-	result_label.text = "Victory!  +%d Gald\nPress Enter to return" % reward
+	result_label.text = "Victory!  +%d Gald  +%d EXP\nPress Enter to return" % [reward_gald, reward_exp]
 	status_label.text = "All enemies defeated."
 
 func _return_from_battle() -> void:
@@ -253,3 +346,5 @@ func _return_from_battle() -> void:
 func _on_unit_state_changed(unit: BattleUnit, new_state: BattleUnit.State) -> void:
 	if unit == hero and new_state == BattleUnit.State.HURT:
 		status_label.text = "Roland is staggered!"
+		if hero.active_skill == null:
+			cast_progress.visible = false

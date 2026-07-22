@@ -1,5 +1,7 @@
 extends Area2D
 
+const BATTLE_TRANSITION = preload("res://battle_transition.gd")
+
 @export var symbol_id: String = "slime_1"
 @export var enemy_data: EnemyData
 var triggered := false
@@ -25,4 +27,4 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 	triggered = true
 	GameData.set_encounter([enemy_data], symbol_id)
-	get_tree().change_scene_to_file("res://battle.tscn")
+	BATTLE_TRANSITION.play_to_battle(get_tree())
