@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/menu_button.gd" id="1_menu_button"]
+
+[node name="MenuButton" type="Button"]
+custom_minimum_size = Vector2(48, 28)
+offset_right = 48.0
+offset_bottom = 28.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 18
+text = "≡"
+tooltip_text = "Menu (M / Esc)"
+script = ExtResource("1_menu_button")

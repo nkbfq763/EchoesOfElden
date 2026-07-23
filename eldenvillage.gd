@@ -1,5 +1,6 @@
 extends Node2D
 
+const MENU_SCREEN = preload("res://scripts/ui/menu_screen.gd")
 const META_PATH := "res://assets/maps/settlements/s001_elden_village/meta/"
 const SCREEN_SIZE := {
 	"bg_screen_a": Vector2i(500, 500),
@@ -44,6 +45,11 @@ var _transition_cooldown := 0.0
 
 func _ready() -> void:
 	load_screen("bg_screen_a")
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("menu"):
+		MENU_SCREEN.open(get_tree())
+		get_viewport().set_input_as_handled()
 
 func load_screen(screen_id: String, entry_direction: String = "") -> void:
 	var meta := _load_screen_metadata(screen_id)
