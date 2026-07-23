@@ -1,0 +1,13 @@
+{
+  "roland_hartwell": {
+    "path": "res://assets/characters/party/roland_hartwell/portrait/common_face.png",
+    "crop_x": 300,
+    "crop_y": 0,
+    "crop_w": 400,
+    "crop_h": 1024,
+    "display_w": 90,
+    "display_h": 180,
+    "offset_x": 0,
+    "offset_y": 0
+  }
+}
