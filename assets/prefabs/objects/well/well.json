@@ -1,0 +1,7 @@
+{
+  "id": "well",
+  "object_ref": "res://assets/prefabs/objects/well/well.png",
+  "mask_ref": "res://assets/prefabs/objects/well/well_mask.png",
+  "category": "SolidOnly",
+  "collision_depth": 0
+}

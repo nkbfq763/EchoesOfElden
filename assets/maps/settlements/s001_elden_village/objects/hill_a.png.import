@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://4fyuq3ijkp2v"
-path="res://.godot/imported/hill_a.png-1199321c63a07392e2d2d1e8360e9ca2.ctex"
+path="res://.godot/imported/hill_a.png-9c739bef0989b72f18060155998eaa19.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/settlements/s001_elden_village/objects_extracted/hill_a.png"
-dest_files=["res://.godot/imported/hill_a.png-1199321c63a07392e2d2d1e8360e9ca2.ctex"]
+source_file="res://assets/maps/settlements/s001_elden_village/objects/hill_a.png"
+dest_files=["res://.godot/imported/hill_a.png-9c739bef0989b72f18060155998eaa19.ctex"]
 
 [params]
 

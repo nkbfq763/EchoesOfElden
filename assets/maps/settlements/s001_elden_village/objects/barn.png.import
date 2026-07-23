@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bh6g3j1mhyxky"
-path="res://.godot/imported/barn.png-ed74013f61ed4bd45b8b390f7fa6fdc1.ctex"
+path="res://.godot/imported/barn.png-31872ec5a21d9dbeb5e2904021b0e028.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/settlements/s001_elden_village/objects_extracted/barn.png"
-dest_files=["res://.godot/imported/barn.png-ed74013f61ed4bd45b8b390f7fa6fdc1.ctex"]
+source_file="res://assets/maps/settlements/s001_elden_village/objects/barn.png"
+dest_files=["res://.godot/imported/barn.png-31872ec5a21d9dbeb5e2904021b0e028.ctex"]
 
 [params]
 

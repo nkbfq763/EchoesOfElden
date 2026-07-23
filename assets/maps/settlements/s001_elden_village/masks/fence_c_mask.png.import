@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://80o5uqqd6hft"
-path="res://.godot/imported/fence_c_mask.png-99eb7a5e7e3487f5b5b07f494f271bc5.ctex"
+path="res://.godot/imported/fence_c_mask.png-c03b4bd8ad090997c8515f687d749ec0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/settlements/s001_elden_village/objects_extracted/fence_c_mask.png"
-dest_files=["res://.godot/imported/fence_c_mask.png-99eb7a5e7e3487f5b5b07f494f271bc5.ctex"]
+source_file="res://assets/maps/settlements/s001_elden_village/masks/fence_c_mask.png"
+dest_files=["res://.godot/imported/fence_c_mask.png-c03b4bd8ad090997c8515f687d749ec0.ctex"]
 
 [params]
 

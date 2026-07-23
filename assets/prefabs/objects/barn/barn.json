@@ -1,0 +1,7 @@
+{
+  "id": "barn",
+  "object_ref": "res://assets/prefabs/objects/barn/barn.png",
+  "mask_ref": "res://assets/prefabs/objects/barn/barn_mask.png",
+  "category": "SideStructure",
+  "collision_depth": 60
+}

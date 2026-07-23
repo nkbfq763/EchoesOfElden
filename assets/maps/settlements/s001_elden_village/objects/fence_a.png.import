@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://6v6wi87pisjv"
-path="res://.godot/imported/fence_a.png-818b0d53a2a7301606ee45e8a6a03669.ctex"
+path="res://.godot/imported/fence_a.png-35ff61a30a4a88b0c8b9c681575fcafb.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/settlements/s001_elden_village/objects_extracted/fence_a.png"
-dest_files=["res://.godot/imported/fence_a.png-818b0d53a2a7301606ee45e8a6a03669.ctex"]
+source_file="res://assets/maps/settlements/s001_elden_village/objects/fence_a.png"
+dest_files=["res://.godot/imported/fence_a.png-35ff61a30a4a88b0c8b9c681575fcafb.ctex"]
 
 [params]
 

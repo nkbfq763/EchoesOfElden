@@ -1,0 +1,7 @@
+{
+  "id": "house_a",
+  "object_ref": "res://assets/prefabs/objects/house_a/house_a.png",
+  "mask_ref": "res://assets/prefabs/objects/house_a/house_a_mask.png",
+  "category": "SideStructure",
+  "collision_depth": 80
+}

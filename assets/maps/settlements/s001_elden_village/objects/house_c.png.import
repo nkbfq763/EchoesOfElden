@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbtwl4wxam0q5"
-path="res://.godot/imported/house_c.png-ed52e855046b3e8eea447d7997d94200.ctex"
+path="res://.godot/imported/house_c.png-7d73fe802a787d8038618b144254f043.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/settlements/s001_elden_village/objects_extracted/house_c.png"
-dest_files=["res://.godot/imported/house_c.png-ed52e855046b3e8eea447d7997d94200.ctex"]
+source_file="res://assets/maps/settlements/s001_elden_village/objects/house_c.png"
+dest_files=["res://.godot/imported/house_c.png-7d73fe802a787d8038618b144254f043.ctex"]
 
 [params]
 

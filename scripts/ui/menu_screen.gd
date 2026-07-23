@@ -4,6 +4,11 @@ const MENU_SCENE_PATH := "res://scenes/ui/MenuScreen.tscn"
 const PORTRAIT_CONFIG_PATH := "res://data/portrait_config.json"
 const MAX_PARTY_SIZE := 4
 
+const TAB_NAMES: Array[String] = [
+	"術・技", "装備", "術式", "作戦", "アイテム", "称号", "ライブラリ", "システム"
+]
+const SELECTED_TAB_NAME := "ビジュアル"
+
 var portrait_config: Dictionary = {}
 var play_time_seconds := 0.0
 
@@ -13,6 +18,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	get_tree().paused = true
 	_load_portrait_config()
+	_style_icon_bar()
 	_build_character_cards()
 	_update_info_bar()
 
@@ -57,6 +63,29 @@ func _load_portrait_config() -> void:
 	if parsed is Dictionary:
 		portrait_config = parsed
 
+func _style_icon_bar() -> void:
+	var icon_bar := $IconBar as HBoxContainer
+	if not icon_bar:
+		return
+	var normal_style := _make_panel_style(
+		Color(0.10, 0.13, 0.20, 0.95), Color(0.35, 0.42, 0.58, 1.0), 1, 4
+	)
+	for index in icon_bar.get_child_count():
+		var button := icon_bar.get_child(index) as Button
+		if not button:
+			continue
+		if index < TAB_NAMES.size():
+			button.text = TAB_NAMES[index]
+		button.add_theme_stylebox_override("normal", normal_style)
+		button.add_theme_stylebox_override("hover", normal_style)
+		button.add_theme_stylebox_override("pressed", normal_style)
+		button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		button.add_theme_font_size_override("font_size", 10)
+		button.add_theme_color_override("font_color", Color(0.82, 0.87, 0.96, 1.0))
+	var selected_label := $SelectedTabLabel as Label
+	if selected_label:
+		selected_label.text = SELECTED_TAB_NAME
+
 func _build_character_cards() -> void:
 	var party: Array[CharacterData] = []
 	for member in GameData.party:
@@ -65,7 +94,7 @@ func _build_character_cards() -> void:
 
 	var cards := $CharacterCards.get_children()
 	for index in cards.size():
-		var card := cards[index] as VBoxContainer
+		var card := cards[index] as Control
 		if not card:
 			continue
 		card.visible = index < mini(party.size(), MAX_PARTY_SIZE)
@@ -73,7 +102,7 @@ func _build_character_cards() -> void:
 			continue
 		_populate_card(card, party[index])
 
-func _populate_card(card: VBoxContainer, data: CharacterData) -> void:
+func _populate_card(card: Control, data: CharacterData) -> void:
 	var portrait := card.get_node("Portrait") as TextureRect
 	var config := _portrait_for_character(data)
 	_configure_portrait(portrait, config)
@@ -83,10 +112,29 @@ func _populate_card(card: VBoxContainer, data: CharacterData) -> void:
 	var max_tp := maxi(1, data.max_tp)
 	var current_tp := data.max_tp if data.current_tp < 0 else clampi(data.current_tp, 0, max_tp)
 	(card.get_node("NameLabel") as Label).text = data.character_name
-	(card.get_node("LvLabel") as Label).text = "Lv 1"
-	(card.get_node("HPLabel") as Label).text = "HP %d/%d" % [current_hp, max_hp]
-	(card.get_node("TPLabel") as Label).text = "TP %d/%d" % [current_tp, max_tp]
-	(card.get_node("ExpLabel") as Label).text = "Exp %d" % GameData.exp
+	(card.get_node("LvBadge") as Label).text = "Lv 1"
+	(card.get_node("HPLabel") as Label).text = "%d/%d" % [current_hp, max_hp]
+	(card.get_node("TPLabel") as Label).text = "TP %d" % current_tp
+
+	var hp_bar := card.get_node("HPBar") as ProgressBar
+	if hp_bar:
+		hp_bar.max_value = max_hp
+		hp_bar.value = current_hp
+		_style_hp_bar(hp_bar)
+
+func _style_hp_bar(hp_bar: ProgressBar) -> void:
+	var bg_style := _make_panel_style(Color(0.06, 0.06, 0.10, 1.0), Color(0.20, 0.22, 0.30, 1.0), 1, 1)
+	var fill_style := _make_panel_style(Color(0.82, 0.62, 0.18, 1.0), Color(0.95, 0.80, 0.40, 1.0), 1, 1)
+	hp_bar.add_theme_stylebox_override("background", bg_style)
+	hp_bar.add_theme_stylebox_override("fill", fill_style)
+
+func _make_panel_style(bg_color: Color, border_color: Color, border_width: int, corner_radius: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg_color
+	style.border_color = border_color
+	style.set_border_width_all(border_width)
+	style.set_corner_radius_all(corner_radius)
+	return style
 
 func _portrait_for_character(data: CharacterData) -> Dictionary:
 	var key := data.character_name.to_lower().replace(" ", "_")
@@ -119,23 +167,18 @@ func _configure_portrait(portrait: TextureRect, config: Dictionary) -> void:
 	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	portrait.region_enabled = true
 	portrait.region_rect = region
-	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	portrait.custom_minimum_size = Vector2(
-		float(config.get("display_w", 90)),
-		float(config.get("display_h", 180))
-	)
-	portrait.position = Vector2(
-		float(config.get("offset_x", 0)),
-		float(config.get("offset_y", 0))
-	)
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 
 func _update_info_bar() -> void:
 	if not is_node_ready():
 		return
-	$InfoBar/GaldLabel.text = "Gald: %d" % GameData.gald
-	$InfoBar/PlayTimeLabel.text = "Time: %s" % _format_play_time()
+	$InfoBar/GaldLabel.text = "GALD  %d" % GameData.gald
+	$InfoBar/PlayTimeLabel.text = "PLAYTIME  %s" % _format_play_time()
 	$InfoBar/HintLabel.text = "Esc/M: 閉じる"
 
 func _format_play_time() -> String:
 	var total_seconds := maxi(0, int(play_time_seconds))
-	return "%02d:%02d" % [total_seconds / 60, total_seconds % 60]
+	var hours := total_seconds / 3600
+	var minutes := (total_seconds % 3600) / 60
+	var seconds := total_seconds % 60
+	return "%03d:%02d:%02d" % [hours, minutes, seconds]

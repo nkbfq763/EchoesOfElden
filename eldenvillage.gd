@@ -2,6 +2,7 @@ extends Node2D
 
 const MENU_SCREEN = preload("res://scripts/ui/menu_screen.gd")
 const META_PATH := "res://assets/maps/settlements/s001_elden_village/meta/"
+const PREFAB_PATH := "res://assets/prefabs/objects/"
 const SCREEN_SIZE := {
 	"bg_screen_a": Vector2i(500, 500),
 	"bg_screen_b": Vector2i(500, 500),
@@ -26,15 +27,26 @@ const SCREEN_NEIGHBORS: Dictionary = {
 		"left": "bg_screen_c",
 	},
 }
-const SOLID_CHANNEL_THRESHOLD := 0.2
-const SOLID_ALPHA_THRESHOLD := 0.5
+
+# 色判定しきい値（0.0-1.0）
+const COLOR_CHANNEL_HIGH := 0.78 # 200/255
+const COLOR_CHANNEL_LOW := 0.32 # 80/255
+const BLACK_CHANNEL_MAX := 0.24 # 60/255
+const MASK_ALPHA_THRESHOLD := 0.5
 const MASK_POLYGON_EPSILON := 2.5
+const MIN_POLYGON_AREA := 8.0
+
+# z_index
+const Z_BACKGROUND := -100
+const Z_OVERHANG := 100
+
 const EDGE_TRIGGER_DISTANCE := 4.0
 const ENTRY_MARGIN := 28.0
 const TRANSITION_COOLDOWN := 0.35
 
 @onready var background: Sprite2D = $BackgroundLayer/Background
 @onready var object_layer: Node2D = $ObjectLayer
+@onready var overhang_layer: Node2D = $OverhangLayer
 @onready var collision_layer: Node2D = $CollisionLayer
 @onready var player: CharacterBody2D = $FieldPlayer
 @onready var camera: Camera2D = $FieldPlayer/Camera2D
@@ -42,6 +54,7 @@ const TRANSITION_COOLDOWN := 0.35
 var current_screen_id := "bg_screen_a"
 var _player_initialized := false
 var _transition_cooldown := 0.0
+var _prefab_cache: Dictionary = {}
 
 func _ready() -> void:
 	load_screen("bg_screen_a")
@@ -62,8 +75,10 @@ func load_screen(screen_id: String, entry_direction: String = "") -> void:
 	background.position = Vector2.ZERO
 	background.centered = false
 	background.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	background.z_index = Z_BACKGROUND
 
 	_clear_layer(object_layer)
+	_clear_layer(overhang_layer)
 	_clear_layer(collision_layer)
 
 	var objects: Array = meta.get("objects", [])
@@ -86,77 +101,111 @@ func change_screen(direction: String) -> void:
 	load_screen(next_screen, _opposite_direction(direction))
 	_transition_cooldown = TRANSITION_COOLDOWN
 
-func generate_polygon_from_mask(mask_path: String) -> Array[PackedVector2Array]:
-	var image := _load_image(mask_path)
-	if image.is_empty():
-		return []
-
-	var bitmap := BitMap.new()
-	bitmap.create(Vector2i(image.get_width(), image.get_height()))
-	var has_solid_pixel := false
-	for y in image.get_height():
-		for x in image.get_width():
-			var pixel := image.get_pixel(x, y)
-			var is_solid := (
-				pixel.a >= SOLID_ALPHA_THRESHOLD
-				and pixel.r <= SOLID_CHANNEL_THRESHOLD
-				and pixel.g <= SOLID_CHANNEL_THRESHOLD
-				and pixel.b <= SOLID_CHANNEL_THRESHOLD
-			)
-			bitmap.set_bit(x, y, is_solid)
-			has_solid_pixel = has_solid_pixel or is_solid
-
-	if not has_solid_pixel:
-		return []
-
-	var bounds := Rect2(Vector2.ZERO, Vector2(image.get_width(), image.get_height()))
-	return bitmap.opaque_to_polygons(bounds, MASK_POLYGON_EPSILON)
-
-func _load_screen_metadata(screen_id: String) -> Dictionary:
-	var metadata_path := META_PATH + "%s.json" % screen_id
-	if not FileAccess.file_exists(metadata_path):
-		push_warning("Missing Elden Village screen metadata: %s" % metadata_path)
-		return {}
-
-	var file := FileAccess.open(metadata_path, FileAccess.READ)
-	if not file:
-		push_warning("Unable to open Elden Village screen metadata: %s" % metadata_path)
-		return {}
-
-	var parsed: Variant = JSON.parse_string(file.get_as_text())
-	if not parsed is Dictionary:
-		push_warning("Invalid Elden Village screen metadata: %s" % metadata_path)
-		return {}
-	return parsed
+# --------------------------------------------------------------------
+# オブジェクト読み込み
+# --------------------------------------------------------------------
 
 func _load_object(object_data: Dictionary) -> void:
-	var object_path: String = str(object_data.get("object_ref", ""))
+	# prefab_ref があれば既定値を読み込み、object_data で上書き
+	var data := object_data.duplicate()
+	var prefab_ref: String = str(object_data.get("prefab_ref", ""))
+	if not prefab_ref.is_empty():
+		var prefab := _load_prefab(prefab_ref)
+		if prefab.is_empty():
+			return
+		var merged := prefab.duplicate()
+		for key in data.keys():
+			merged[key] = data[key]
+		data = merged
+
+	var object_path: String = str(data.get("object_ref", ""))
 	var texture := load(object_path) as Texture2D
 	if not texture:
-		push_warning("Missing Elden Village object texture: %s" % object_path)
+		push_warning("Missing object texture: %s" % object_path)
 		return
 
-	var sprite := Sprite2D.new()
-	sprite.name = str(object_data.get("id", "Object"))
-	sprite.texture = texture
-	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	sprite.centered = false
-	var position_data: Dictionary = object_data.get("position", {})
-	sprite.position = Vector2(
+	var position_data: Dictionary = data.get("position", {})
+	var obj_position := Vector2(
 		float(position_data.get("x", 0.0)),
 		float(position_data.get("y", 0.0))
 	)
-	var object_scale := float(object_data.get("scale", 1.0))
+	var object_scale := float(data.get("scale", 1.0))
+	var category: String = str(data.get("category", "SolidOnly"))
+	var collision_depth := float(data.get("collision_depth", 0.0))
+	var mask_path: String = str(data.get("mask_ref", ""))
+
+	# 本体スプライト（Yソート空間。足元Yで前後関係が決まる）
+	var sprite := Sprite2D.new()
+	sprite.name = str(data.get("id", "Object"))
+	sprite.texture = texture
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	sprite.centered = false
+	sprite.position = obj_position
 	sprite.scale = Vector2(object_scale, object_scale)
-	sprite.z_index = _object_z_index(sprite)
 	object_layer.add_child(sprite)
 
-	if bool(object_data.get("collision", false)):
-		_add_object_collisions(object_data, sprite)
+	# Overhang（赤部分）は前面レイヤに分離（衝突なし・常にキャラより前）
+	var overhang_tex := _build_color_texture(mask_path, object_path, "overhang")
+	if overhang_tex:
+		var overhang := Sprite2D.new()
+		overhang.name = "%s_Overhang" % sprite.name
+		overhang.texture = overhang_tex
+		overhang.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		overhang.centered = false
+		overhang.position = obj_position
+		overhang.scale = Vector2(object_scale, object_scale)
+		overhang.z_index = Z_OVERHANG
+		overhang_layer.add_child(overhang)
 
-func _add_object_collisions(object_data: Dictionary, sprite: Sprite2D) -> void:
-	var mask_path: String = str(object_data.get("mask_ref", ""))
-	var polygons := generate_polygon_from_mask(mask_path)
+	# 衝突（カテゴリに応じて黒=全身 / 青=足元帯）
+	# Walkable（緑）は無衝突。Overhang（赤）も通行可能なので衝突を作らない。
+	if bool(data.get("collision", false)) and category != "Walkable":
+		_add_object_collisions(sprite, mask_path, category, collision_depth)
+
+# --------------------------------------------------------------------
+# 衝突生成（案B：色分け）
+# --------------------------------------------------------------------
+
+func _add_object_collisions(sprite: Sprite2D, mask_path: String, category: String, collision_depth: float) -> void:
+	var image := _load_image(mask_path)
+	if image.is_empty():
+		return
+
+	var w := image.get_width()
+	var h := image.get_height()
+	var bitmap := BitMap.new()
+	bitmap.create(Vector2i(w, h))
+
+	var has_pixel := false
+	match category:
+		"SolidOnly":
+			# 黒（Solid）を全身衝突
+			for y in h:
+				for x in w:
+					var solid := _is_solid(image.get_pixel(x, y))
+					bitmap.set_bit(x, y, solid)
+					has_pixel = has_pixel or solid
+		"SideStructure":
+			# 青（SideStructure）のうち足元帯（下端から collision_depth px）のみ衝突
+			var depth := int(maxf(collision_depth, 1.0))
+			var y_start := maxi(h - depth, 0)
+			for y in range(y_start, h):
+				for x in w:
+					var side := _is_side(image.get_pixel(x, y)) or _is_solid(image.get_pixel(x, y))
+					bitmap.set_bit(x, y, side)
+					has_pixel = has_pixel or side
+		"Walkable":
+			# 緑（Walkable）は無衝突（明示）
+			return
+		_:
+			# Overhang・その他カテゴリは衝突なし
+			return
+
+	if not has_pixel:
+		return
+
+	var bounds := Rect2(Vector2.ZERO, Vector2(w, h))
+	var polygons := bitmap.opaque_to_polygons(bounds, MASK_POLYGON_EPSILON)
 	if polygons.is_empty():
 		return
 
@@ -174,10 +223,104 @@ func _add_object_collisions(object_data: Dictionary, sprite: Sprite2D) -> void:
 		collision.polygon = polygons[index]
 		body.add_child(collision)
 
-func _object_z_index(sprite: Sprite2D) -> int:
-	if not sprite.texture:
-		return int(sprite.position.y)
-	return roundi(sprite.position.y + sprite.texture.get_height() * sprite.scale.y)
+# --------------------------------------------------------------------
+# Overhang（赤部分）の描画用テクスチャ生成
+# --------------------------------------------------------------------
+
+func _build_color_texture(mask_path: String, object_path: String, color_kind: String) -> Texture2D:
+	var mask_image := _load_image(mask_path)
+	if mask_image.is_empty():
+		return null
+
+	# 対応するオブジェクト画像から赤マスク部分だけを切り出す
+	# object_ref を正本として使い、マスクパスからの推定には依存しない
+	var object_texture := load(object_path) as Texture2D
+	if not object_texture:
+		return null
+	var object_image := object_texture.get_image()
+	if object_image.is_empty():
+		return null
+
+	# マスクとオブジェクト画像でサイズが異なる場合に備えて共通範囲のみ処理
+	var w := mini(mask_image.get_width(), object_image.get_width())
+	var h := mini(mask_image.get_height(), object_image.get_height())
+	var out_image := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	var found := false
+	for y in h:
+		for x in w:
+			var mp := mask_image.get_pixel(x, y)
+			var is_target := false
+			match color_kind:
+				"overhang":
+					is_target = _is_overhang(mp)
+			if is_target:
+				var op := object_image.get_pixel(x, y)
+				out_image.set_pixel(x, y, op)
+				found = true
+			else:
+				out_image.set_pixel(x, y, Color(0, 0, 0, 0))
+
+	if not found:
+		return null
+	return ImageTexture.create_from_image(out_image)
+
+# --------------------------------------------------------------------
+# 色判定
+# --------------------------------------------------------------------
+
+func _is_overhang(p: Color) -> bool:
+	return p.a >= MASK_ALPHA_THRESHOLD and p.r >= COLOR_CHANNEL_HIGH and p.g <= COLOR_CHANNEL_LOW and p.b <= COLOR_CHANNEL_LOW
+
+func _is_side(p: Color) -> bool:
+	return p.a >= MASK_ALPHA_THRESHOLD and p.b >= COLOR_CHANNEL_HIGH and p.r <= COLOR_CHANNEL_LOW and p.g <= COLOR_CHANNEL_LOW
+
+func _is_solid(p: Color) -> bool:
+	return p.a >= MASK_ALPHA_THRESHOLD and p.r <= BLACK_CHANNEL_MAX and p.g <= BLACK_CHANNEL_MAX and p.b <= BLACK_CHANNEL_MAX
+
+# --------------------------------------------------------------------
+# prefab
+# --------------------------------------------------------------------
+
+func _load_prefab(prefab_id: String) -> Dictionary:
+	if _prefab_cache.has(prefab_id):
+		return _prefab_cache[prefab_id]
+	var path := "%s%s/%s.json" % [PREFAB_PATH, prefab_id, prefab_id]
+	if not FileAccess.file_exists(path):
+		push_warning("Missing prefab: %s" % path)
+		return {}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return {}
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if not parsed is Dictionary:
+		return {}
+	_prefab_cache[prefab_id] = parsed
+	return parsed
+
+# --------------------------------------------------------------------
+# 画面メタ
+# --------------------------------------------------------------------
+
+func _load_screen_metadata(screen_id: String) -> Dictionary:
+	var metadata_path := META_PATH + "%s.json" % screen_id
+	if not FileAccess.file_exists(metadata_path):
+		push_warning("Missing screen metadata: %s" % metadata_path)
+		return {}
+
+	var file := FileAccess.open(metadata_path, FileAccess.READ)
+	if not file:
+		push_warning("Unable to open screen metadata: %s" % metadata_path)
+		return {}
+
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if not parsed is Dictionary:
+		push_warning("Invalid screen metadata: %s" % metadata_path)
+		return {}
+	return parsed
+
+# --------------------------------------------------------------------
+# カメラ / 遷移
+# --------------------------------------------------------------------
 
 func _configure_camera(screen_id: String) -> void:
 	var size := _screen_size(screen_id)

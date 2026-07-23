@@ -1,0 +1,7 @@
+{
+  "id": "hill_a",
+  "object_ref": "res://assets/prefabs/objects/hill_a/hill_a.png",
+  "mask_ref": "res://assets/prefabs/objects/hill_a/hill_a_mask.png",
+  "category": "Walkable",
+  "collision_depth": 0
+}

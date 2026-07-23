@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dgyho7cqrl4mo"
-path="res://.godot/imported/barn_mask.png-fca5b1cd2a140035ecad87f44a93424a.ctex"
+path="res://.godot/imported/barn_mask.png-68c493b9af7657001585afbbf39c3358.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/settlements/s001_elden_village/objects_extracted/barn_mask.png"
-dest_files=["res://.godot/imported/barn_mask.png-fca5b1cd2a140035ecad87f44a93424a.ctex"]
+source_file="res://assets/maps/settlements/s001_elden_village/masks/barn_mask.png"
+dest_files=["res://.godot/imported/barn_mask.png-68c493b9af7657001585afbbf39c3358.ctex"]
 
 [params]
 

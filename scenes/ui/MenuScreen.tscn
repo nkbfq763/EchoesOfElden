@@ -22,212 +22,540 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.035, 0.055, 0.09, 0.96)
+color = Color(0.02, 0.03, 0.05, 0.97)
 
-[node name="TabMenu" type="HBoxContainer" parent="."]
+[node name="IconBar" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 12.0
-offset_right = 624.0
-offset_bottom = 40.0
-theme_override_constants/separation = 20
+offset_left = 150.0
+offset_top = 6.0
+offset_right = 490.0
+offset_bottom = 34.0
+theme_override_constants/separation = 6
+alignment = 1
 
-[node name="StatusTab" type="Label" parent="TabMenu"]
+[node name="Icon0" type="Button" parent="IconBar"]
+custom_minimum_size = Vector2(34, 28)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.82, 0.35, 1)
-theme_override_font_sizes/font_size = 16
-text = "ステータス"
+focus_mode = 0
+mouse_filter = 2
+text = "術・技"
 
-[node name="ItemsTab" type="Label" parent="TabMenu"]
+[node name="Icon1" type="Button" parent="IconBar"]
+custom_minimum_size = Vector2(34, 28)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.65, 0.78, 1)
-theme_override_font_sizes/font_size = 16
-text = "アイテム"
+focus_mode = 0
+mouse_filter = 2
+text = "装備"
+
+[node name="Icon2" type="Button" parent="IconBar"]
+custom_minimum_size = Vector2(34, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+text = "術式"
+
+[node name="Icon3" type="Button" parent="IconBar"]
+custom_minimum_size = Vector2(34, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+text = "作戦"
+
+[node name="Icon4" type="Button" parent="IconBar"]
+custom_minimum_size = Vector2(34, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+text = "ｱｲﾃﾑ"
+
+[node name="Icon5" type="Button" parent="IconBar"]
+custom_minimum_size = Vector2(34, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+text = "称号"
+
+[node name="Icon6" type="Button" parent="IconBar"]
+custom_minimum_size = Vector2(34, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+text = "ﾗｲﾌﾞﾗﾘ"
+
+[node name="Icon7" type="Button" parent="IconBar"]
+custom_minimum_size = Vector2(34, 28)
+layout_mode = 2
+focus_mode = 0
+mouse_filter = 2
+text = "ｼｽﾃﾑ"
+
+[node name="SelectedTabLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 36.0
+offset_right = 640.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.98, 0.84, 0.35, 1)
+theme_override_font_sizes/font_size = 13
+text = "ビジュアル"
+horizontal_alignment = 1
 
 [node name="CharacterCards" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 16.0
-offset_top = 48.0
-offset_right = 624.0
-offset_bottom = 312.0
-theme_override_constants/separation = 8
+offset_left = 8.0
+offset_top = 56.0
+offset_right = 632.0
+offset_bottom = 316.0
+theme_override_constants/separation = 4
+alignment = 1
 
-[node name="Card_1" type="VBoxContainer" parent="CharacterCards"]
-custom_minimum_size = Vector2(145, 252)
+[node name="Card_1" type="Control" parent="CharacterCards"]
+custom_minimum_size = Vector2(150, 260)
 layout_mode = 2
-theme_override_constants/separation = 2
+
+[node name="CardBg" type="ColorRect" parent="CharacterCards/Card_1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.07, 0.11, 1)
 
 [node name="Portrait" type="TextureRect" parent="CharacterCards/Card_1"]
-custom_minimum_size = Vector2(90, 180)
-layout_mode = 2
-size_flags_horizontal = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 texture_filter = 1
 expand_mode = 1
 stretch_mode = 5
 script = ExtResource("2_portrait_rect")
+
+[node name="BottomShade" type="ColorRect" parent="CharacterCards/Card_1"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -44.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.01, 0.015, 0.03, 0.88)
+
+[node name="LvBadge" type="Label" parent="CharacterCards/Card_1"]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 196.0
+offset_right = 148.0
+offset_bottom = 218.0
+theme_override_colors/font_color = Color(0.98, 0.84, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv 1"
+horizontal_alignment = 1
+
+[node name="SubBadge" type="Label" parent="CharacterCards/Card_1"]
+visible = false
+layout_mode = 0
+offset_left = 108.0
+offset_top = 60.0
+offset_right = 150.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.55, 0.95, 0.45, 1)
+theme_override_font_sizes/font_size = 12
+text = "Sub"
+horizontal_alignment = 2
 
 [node name="NameLabel" type="Label" parent="CharacterCards/Card_1"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 13
+layout_mode = 0
+offset_left = 4.0
+offset_top = 220.0
+offset_right = 146.0
+offset_bottom = 234.0
+theme_override_font_sizes/font_size = 11
 text = "Name"
 horizontal_alignment = 1
 
-[node name="LvLabel" type="Label" parent="CharacterCards/Card_1"]
-layout_mode = 2
-text = "Lv 1"
-horizontal_alignment = 1
+[node name="HPBar" type="ProgressBar" parent="CharacterCards/Card_1"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 8.0
+offset_top = 236.0
+offset_right = 142.0
+offset_bottom = 244.0
+mouse_filter = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
 
 [node name="HPLabel" type="Label" parent="CharacterCards/Card_1"]
-layout_mode = 2
-text = "HP 0/0"
-horizontal_alignment = 1
+layout_mode = 0
+offset_left = 4.0
+offset_top = 244.0
+offset_right = 90.0
+offset_bottom = 258.0
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "0/0"
 
 [node name="TPLabel" type="Label" parent="CharacterCards/Card_1"]
-layout_mode = 2
-text = "TP 0/0"
-horizontal_alignment = 1
+layout_mode = 0
+offset_left = 90.0
+offset_top = 244.0
+offset_right = 146.0
+offset_bottom = 258.0
+theme_override_colors/font_color = Color(0.55, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "TP 0"
+horizontal_alignment = 2
 
-[node name="ExpLabel" type="Label" parent="CharacterCards/Card_1"]
+[node name="Card_2" type="Control" parent="CharacterCards"]
+custom_minimum_size = Vector2(150, 260)
 layout_mode = 2
-text = "Exp 0"
-horizontal_alignment = 1
 
-[node name="Card_2" type="VBoxContainer" parent="CharacterCards"]
-custom_minimum_size = Vector2(145, 252)
-layout_mode = 2
-theme_override_constants/separation = 2
+[node name="CardBg" type="ColorRect" parent="CharacterCards/Card_2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.07, 0.11, 1)
 
 [node name="Portrait" type="TextureRect" parent="CharacterCards/Card_2"]
-custom_minimum_size = Vector2(90, 180)
-layout_mode = 2
-size_flags_horizontal = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 texture_filter = 1
 expand_mode = 1
 stretch_mode = 5
 script = ExtResource("2_portrait_rect")
+
+[node name="BottomShade" type="ColorRect" parent="CharacterCards/Card_2"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -44.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.01, 0.015, 0.03, 0.88)
+
+[node name="LvBadge" type="Label" parent="CharacterCards/Card_2"]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 196.0
+offset_right = 148.0
+offset_bottom = 218.0
+theme_override_colors/font_color = Color(0.98, 0.84, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv 1"
+horizontal_alignment = 1
+
+[node name="SubBadge" type="Label" parent="CharacterCards/Card_2"]
+visible = false
+layout_mode = 0
+offset_left = 108.0
+offset_top = 60.0
+offset_right = 150.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.55, 0.95, 0.45, 1)
+theme_override_font_sizes/font_size = 12
+text = "Sub"
+horizontal_alignment = 2
 
 [node name="NameLabel" type="Label" parent="CharacterCards/Card_2"]
-layout_mode = 2
+layout_mode = 0
+offset_left = 4.0
+offset_top = 220.0
+offset_right = 146.0
+offset_bottom = 234.0
+theme_override_font_sizes/font_size = 11
 text = "Name"
 horizontal_alignment = 1
 
-[node name="LvLabel" type="Label" parent="CharacterCards/Card_2"]
-layout_mode = 2
-text = "Lv 1"
-horizontal_alignment = 1
+[node name="HPBar" type="ProgressBar" parent="CharacterCards/Card_2"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 8.0
+offset_top = 236.0
+offset_right = 142.0
+offset_bottom = 244.0
+mouse_filter = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
 
 [node name="HPLabel" type="Label" parent="CharacterCards/Card_2"]
-layout_mode = 2
-text = "HP 0/0"
-horizontal_alignment = 1
+layout_mode = 0
+offset_left = 4.0
+offset_top = 244.0
+offset_right = 90.0
+offset_bottom = 258.0
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "0/0"
 
 [node name="TPLabel" type="Label" parent="CharacterCards/Card_2"]
-layout_mode = 2
-text = "TP 0/0"
-horizontal_alignment = 1
+layout_mode = 0
+offset_left = 90.0
+offset_top = 244.0
+offset_right = 146.0
+offset_bottom = 258.0
+theme_override_colors/font_color = Color(0.55, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "TP 0"
+horizontal_alignment = 2
 
-[node name="ExpLabel" type="Label" parent="CharacterCards/Card_2"]
+[node name="Card_3" type="Control" parent="CharacterCards"]
+custom_minimum_size = Vector2(150, 260)
 layout_mode = 2
-text = "Exp 0"
-horizontal_alignment = 1
 
-[node name="Card_3" type="VBoxContainer" parent="CharacterCards"]
-custom_minimum_size = Vector2(145, 252)
-layout_mode = 2
-theme_override_constants/separation = 2
+[node name="CardBg" type="ColorRect" parent="CharacterCards/Card_3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.07, 0.11, 1)
 
 [node name="Portrait" type="TextureRect" parent="CharacterCards/Card_3"]
-custom_minimum_size = Vector2(90, 180)
-layout_mode = 2
-size_flags_horizontal = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 texture_filter = 1
 expand_mode = 1
 stretch_mode = 5
 script = ExtResource("2_portrait_rect")
+
+[node name="BottomShade" type="ColorRect" parent="CharacterCards/Card_3"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -44.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.01, 0.015, 0.03, 0.88)
+
+[node name="LvBadge" type="Label" parent="CharacterCards/Card_3"]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 196.0
+offset_right = 148.0
+offset_bottom = 218.0
+theme_override_colors/font_color = Color(0.98, 0.84, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv 1"
+horizontal_alignment = 1
+
+[node name="SubBadge" type="Label" parent="CharacterCards/Card_3"]
+visible = false
+layout_mode = 0
+offset_left = 108.0
+offset_top = 60.0
+offset_right = 150.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.55, 0.95, 0.45, 1)
+theme_override_font_sizes/font_size = 12
+text = "Sub"
+horizontal_alignment = 2
 
 [node name="NameLabel" type="Label" parent="CharacterCards/Card_3"]
-layout_mode = 2
+layout_mode = 0
+offset_left = 4.0
+offset_top = 220.0
+offset_right = 146.0
+offset_bottom = 234.0
+theme_override_font_sizes/font_size = 11
 text = "Name"
 horizontal_alignment = 1
 
-[node name="LvLabel" type="Label" parent="CharacterCards/Card_3"]
-layout_mode = 2
-text = "Lv 1"
-horizontal_alignment = 1
+[node name="HPBar" type="ProgressBar" parent="CharacterCards/Card_3"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 8.0
+offset_top = 236.0
+offset_right = 142.0
+offset_bottom = 244.0
+mouse_filter = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
 
 [node name="HPLabel" type="Label" parent="CharacterCards/Card_3"]
-layout_mode = 2
-text = "HP 0/0"
-horizontal_alignment = 1
+layout_mode = 0
+offset_left = 4.0
+offset_top = 244.0
+offset_right = 90.0
+offset_bottom = 258.0
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "0/0"
 
 [node name="TPLabel" type="Label" parent="CharacterCards/Card_3"]
-layout_mode = 2
-text = "TP 0/0"
-horizontal_alignment = 1
+layout_mode = 0
+offset_left = 90.0
+offset_top = 244.0
+offset_right = 146.0
+offset_bottom = 258.0
+theme_override_colors/font_color = Color(0.55, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "TP 0"
+horizontal_alignment = 2
 
-[node name="ExpLabel" type="Label" parent="CharacterCards/Card_3"]
+[node name="Card_4" type="Control" parent="CharacterCards"]
+custom_minimum_size = Vector2(150, 260)
 layout_mode = 2
-text = "Exp 0"
-horizontal_alignment = 1
 
-[node name="Card_4" type="VBoxContainer" parent="CharacterCards"]
-custom_minimum_size = Vector2(145, 252)
-layout_mode = 2
-theme_override_constants/separation = 2
+[node name="CardBg" type="ColorRect" parent="CharacterCards/Card_4"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.07, 0.11, 1)
 
 [node name="Portrait" type="TextureRect" parent="CharacterCards/Card_4"]
-custom_minimum_size = Vector2(90, 180)
-layout_mode = 2
-size_flags_horizontal = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 texture_filter = 1
 expand_mode = 1
 stretch_mode = 5
 script = ExtResource("2_portrait_rect")
 
-[node name="NameLabel" type="Label" parent="CharacterCards/Card_4"]
-layout_mode = 2
-text = "Name"
-horizontal_alignment = 1
+[node name="BottomShade" type="ColorRect" parent="CharacterCards/Card_4"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -44.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.01, 0.015, 0.03, 0.88)
 
-[node name="LvLabel" type="Label" parent="CharacterCards/Card_4"]
-layout_mode = 2
+[node name="LvBadge" type="Label" parent="CharacterCards/Card_4"]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 196.0
+offset_right = 148.0
+offset_bottom = 218.0
+theme_override_colors/font_color = Color(0.98, 0.84, 0.35, 1)
+theme_override_font_sizes/font_size = 12
 text = "Lv 1"
 horizontal_alignment = 1
 
-[node name="HPLabel" type="Label" parent="CharacterCards/Card_4"]
-layout_mode = 2
-text = "HP 0/0"
+[node name="SubBadge" type="Label" parent="CharacterCards/Card_4"]
+visible = false
+layout_mode = 0
+offset_left = 108.0
+offset_top = 60.0
+offset_right = 150.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.55, 0.95, 0.45, 1)
+theme_override_font_sizes/font_size = 12
+text = "Sub"
+horizontal_alignment = 2
+
+[node name="NameLabel" type="Label" parent="CharacterCards/Card_4"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 220.0
+offset_right = 146.0
+offset_bottom = 234.0
+theme_override_font_sizes/font_size = 11
+text = "Name"
 horizontal_alignment = 1
+
+[node name="HPBar" type="ProgressBar" parent="CharacterCards/Card_4"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 0
+offset_left = 8.0
+offset_top = 236.0
+offset_right = 142.0
+offset_bottom = 244.0
+mouse_filter = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="CharacterCards/Card_4"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 244.0
+offset_right = 90.0
+offset_bottom = 258.0
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "0/0"
 
 [node name="TPLabel" type="Label" parent="CharacterCards/Card_4"]
-layout_mode = 2
-text = "TP 0/0"
-horizontal_alignment = 1
-
-[node name="ExpLabel" type="Label" parent="CharacterCards/Card_4"]
-layout_mode = 2
-text = "Exp 0"
-horizontal_alignment = 1
+layout_mode = 0
+offset_left = 90.0
+offset_top = 244.0
+offset_right = 146.0
+offset_bottom = 258.0
+theme_override_colors/font_color = Color(0.55, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 10
+text = "TP 0"
+horizontal_alignment = 2
 
 [node name="InfoBar" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 16.0
-offset_top = 320.0
+offset_top = 324.0
 offset_right = 624.0
-offset_bottom = 350.0
-theme_override_constants/separation = 18
+offset_bottom = 352.0
+theme_override_constants/separation = 16
 
 [node name="GaldLabel" type="Label" parent="InfoBar"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.84, 0.35, 1)
-text = "Gald: 0"
+theme_override_font_sizes/font_size = 13
+text = "GALD  0"
 
 [node name="PlayTimeLabel" type="Label" parent="InfoBar"]
 layout_mode = 2
-text = "Time: 00:00"
+theme_override_font_sizes/font_size = 13
+text = "PLAYTIME  000:00:00"
 
 [node name="HintLabel" type="Label" parent="InfoBar"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.55, 0.65, 0.78, 1)
+theme_override_font_sizes/font_size = 11
 text = "Esc/M: 閉じる"
 horizontal_alignment = 2

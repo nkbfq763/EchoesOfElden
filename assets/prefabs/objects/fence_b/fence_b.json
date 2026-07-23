@@ -1,0 +1,7 @@
+{
+  "id": "fence_b",
+  "object_ref": "res://assets/prefabs/objects/fence_b/fence_b.png",
+  "mask_ref": "res://assets/prefabs/objects/fence_b/fence_b_mask.png",
+  "category": "SolidOnly",
+  "collision_depth": 0
+}
