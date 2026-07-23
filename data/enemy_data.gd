@@ -11,3 +11,5 @@ class_name EnemyData
 @export_range(0.1, 2.0) var aggression: float = 1.0
 @export var move_speed: float = 45.0
 @export_file("*.png") var battle_sprite: String = "res://assets/enemies/slime/battle.png"
+@export_dir var animations_path: String = ""
+@export var battle_bg: String = ""
