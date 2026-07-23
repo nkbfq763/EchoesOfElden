@@ -28,8 +28,12 @@ static func open(tree: SceneTree) -> void:
 		push_warning("Unable to load menu scene: %s" % MENU_SCENE_PATH)
 		return
 	var menu := scene.instantiate() as Control
-	if menu:
-		tree.root.add_child(menu)
+	if not menu:
+		return
+	var layer := CanvasLayer.new()
+	layer.layer = 128
+	layer.add_child(menu)
+	tree.root.add_child(layer)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("menu") or event.is_action_pressed("ui_cancel"):
@@ -37,7 +41,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _close() -> void:
 	get_tree().paused = false
-	queue_free()
+	var host := get_parent()
+	if host is CanvasLayer:
+		host.queue_free()
+	else:
+		queue_free()
 
 func _load_portrait_config() -> void:
 	if not FileAccess.file_exists(PORTRAIT_CONFIG_PATH):
