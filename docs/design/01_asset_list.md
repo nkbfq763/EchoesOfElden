@@ -7,7 +7,7 @@
 共通規格:
 - アートスタイル: テイルズ オブ エターニア風アニメ塗り（明るく彩度高め、太めの主線）。
 - 透過PNG (RGBA)。ピクセルパーフェクト表示のため整数スケール前提。
-- ネーミング: `snake_case`。配置は `assets/` 配下（下表の想定パス）。
+- ネーミング: IDは `snake_case`。配置は `assets/` 配下。実装済みアニメーションのフォルダ名はLinuxの大文字小文字を含めて実物に合わせる。
 
 凡例: 優先度 P1=今回必須 / P2=次回 / P3=後回し
 
@@ -19,16 +19,11 @@
 
 | ID | 用途 | 仕様 | 想定パス | 優先度 |
 | --- | --- | --- | --- | --- |
-| `hero_field` | 主人公・フィールド歩行 | 4方向(下/上/左/右) x 歩行3コマ + 待機1コマ。1コマ 32x48 | `assets/characters/hero/field.png` | P2 |
-| `hero_battle` | 主人公・バトル | 待機/前進/攻撃1-3/被弾/ガード/勝利。横向き基準 64x64 | `assets/characters/hero/battle.png` | P3 |
-| `childhood_girl_field` | 幼馴染・フィールド歩行 | 同上規格 | `assets/characters/childhood_girl/field.png` | P2 |
-| `childhood_girl_battle` | 幼馴染・バトル | 待機/前進/詠唱/術発動/被弾/勝利 64x64 | `assets/characters/childhood_girl/battle.png` | P3 |
-| `otherworld_girl_field` | 異世界の少女・フィールド歩行 | 同上規格 | `assets/characters/otherworld_girl/field.png` | P3 |
-| `otherworld_girl_battle` | 異世界の少女・バトル | 待機/前進/詠唱/術発動/被弾/勝利 64x64 | `assets/characters/otherworld_girl/battle.png` | P3 |
-| `elder_youth_field` | 年上青年・フィールド歩行 | 同上規格 | `assets/characters/elder_youth/field.png` | P3 |
-| `elder_youth_battle` | 年上青年・バトル | 待機/前進/攻撃1-3/ガード/被弾/勝利 64x64 | `assets/characters/elder_youth/battle.png` | P3 |
-| `*_face` | 会話用立ち絵/顔グラ | 256x256 表情差分(通常/笑/怒/驚) | `assets/characters/<id>/face.png` | P2 |
-| `otherworld_girl_falling` | OP用・落下ポーズ | 空から降ってくる1枚絵(立ち絵) | `assets/characters/otherworld_girl/falling.png` | P3 |
+| `roland_field` | 主人公・フィールド歩行 | 8方向。`Run/<direction>/frame_000..005.png` + `idle/<direction>.png`。入力フレームは約124x124 | `assets/characters/party/roland_hartwell/field/animations/` | 実装済み |
+| `roland_battle` | 主人公・バトル | 約124x124の個別PNG。`idle / Run / attack/Combo_01..03 / Guard / Parry` | `assets/characters/party/roland_hartwell/battle/animations/` | 実装済み |
+| `fiona_portrait` | Fiona・ポートレート | 顔グラ差分。Playableのfield/battleは未実装 | `assets/characters/party/fiona_merrick/portrait/` | 一部実装 |
+| `*_field` / `*_battle` | Fiona/Selene/Gareth | 4人パーティ用の将来アセット。実装時は同じフォルダ規約を使用 | `assets/characters/party/<id>/{field,battle}/animations/` | 将来 |
+| `*_portrait` | 会話/メニュー用顔グラ | character IDごとのポートレート。メニュー表示は`portrait_config.json`でCrop指定 | `assets/characters/party/<id>/portrait/` | Roland/Fiona一部実装 |
 
 > スプライトシートはグリッド整列（等間隔セル）。セル数・列数は `02_asset_prompts.md` に明記。
 
@@ -36,22 +31,22 @@
 
 | ID | 用途 | 仕様 | 想定パス | 優先度 |
 | --- | --- | --- | --- | --- |
-| `slime_field` | フィールド敵シンボル | 32x32 待機2コマ | `assets/enemies/slime/symbol.png` | P1(暫定単色可) |
-| `slime_battle` | バトル | 64x64 待機/移動/攻撃/被弾/消滅 | `assets/enemies/slime/battle.png` | P2 |
-| `goblin_battle` | バトル雑魚 | 64x64 同上 | `assets/enemies/goblin/battle.png` | P2 |
-| `boss_golem` | ボス | 128x128 待機/攻撃/怒り/被弾/撃破 | `assets/enemies/boss_golem/battle.png` | P3 |
+| `slime_field` | フィールド敵シンボル | 現在はシンボルのデータのみ。描画は暫定 | `data/slime.tres` | 実装済み |
+| `wolf_battle` | バトル雑魚 | `Idle / Run / Attack/Combo_01`。個別PNGフレーム | `assets/characters/enemies/wolf/animations/` | 実装済み |
+| `slime_battle` / `goblin_battle` | バトル雑魚 | `animations_path`未設定のため矩形フォールバック | `data/slime.tres` / `data/goblin.tres` | 暫定実装 |
+| `boss_golem` | ボス | 待機/攻撃/怒り/被弾/撃破を予定 | `assets/characters/enemies/boss_golem/` | 将来 |
 
 ## 3. マップ / タイルセット
 
 | ID | 用途 | 仕様 | 想定パス | 優先度 |
 | --- | --- | --- | --- | --- |
-| `town_tileset` | 町タイル | 16x16 or 32x32 グリッド。地面/道/草/壁/屋根/水 | `assets/tilesets/town.png` | P1 |
-| `field_tileset` | フィールド | 同規格。草原/土/岩/木/花 | `assets/tilesets/field.png` | P1 |
-| `dungeon_tileset` | ダンジョン | 同規格。石床/壁/扉/宝箱/松明 | `assets/tilesets/dungeon.png` | P2 |
-| `town_objects` | 建物/装飾 | 家・看板・井戸・柵など単体オブジェクト | `assets/tilesets/town_objects.png` | P2 |
-| `battle_bg_field` | バトル背景 | 640x360 横長。草原の1枚絵（多層パララックス可） | `assets/backgrounds/battle_field.png` | P1 |
+| `town_tileset` | 町タイル | 将来のTileMapLayer用。現在のEldenVillageは背景画像方式 | `assets/tilesets/town.png` | 将来 |
+| `field_tileset` | フィールド | 将来のTileMapLayer用 | `assets/tilesets/field.png` | 将来 |
+| `dungeon_tileset` | ダンジョン | 石床/壁/扉/宝箱/松明を予定 | `assets/tilesets/dungeon.png` | 将来 |
+| `town_objects` | 建物/装飾 | 現在は画面別の個別PNGオブジェクトを使用 | `assets/maps/settlements/s001_elden_village/objects/` | 実装済み |
+| `battle_bg_<biome>` | バトル背景 | 640x360。現在は単層PNG | `assets/maps/battle_maps/battle_bg_<biome>.png` | 実装済み |
 
-> 現状 `assets/images/town.png` は暫定背景。P1でTileMapLayer用の `town_tileset` に移行する。
+> 現在のEldenVillageは `assets/maps/settlements/s001_elden_village/{background,masks,objects,meta}/` を使用する。TileMapLayerへの移行は将来対応。
 
 ## 4. UI
 
@@ -83,7 +78,7 @@
 ---
 
 ## AssetManager への引き継ぎ事項
-- P1で最優先なのは **tileset（town/field）・battle背景・UI基本(window/gauge/button)**。
+- 現在の実装済み優先素材は **EldenVillage背景/オブジェクト/マスク、Roland/Wolfの個別フレーム、battle背景**。TileSet・外部UI素材は将来対応。
 - スプライトシートは**セルサイズ・列数・行の意味**を `02_asset_prompts.md` の通り固定して生成すること。
   ズレるとGodot側のフレーム切り出し(`hframes`/`vframes`)が破綻する。
 - import後は `.import` の Filter を **Off (Nearest)** に設定（ピクセルのにじみ防止）。

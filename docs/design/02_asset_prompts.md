@@ -36,10 +36,11 @@ drop shadow on background, text, signature, watermark, cropped, low-res.
 ### 1-1. フィールド歩行シート（各キャラ共通レイアウト）
 ```
 A <キャラ英語説明> sprite sheet for a top-down 2D JRPG, Tales of Eternia style.
-LAYOUT: grid of 4 rows x 4 columns (16 cells), evenly spaced, each cell 32x48 px.
+LEGACY LAYOUT: grid of 4 rows x 4 columns (16 cells), evenly spaced, each cell 32x48 px.
 Row order: facing DOWN, UP, LEFT, RIGHT.
 Column order: idle, walk-1, walk-2, walk-3.
 Consistent character across all cells, transparent background.
+現行のRolandフィールド実装はこのシート形式ではなく、8方向の個別PNGフレームを使用する。
 [+ STYLE tokens] [+ NEGATIVE]
 ```
 日本語: 行→下上左右、列→待機/歩1/歩2/歩3。32x48セルの4x4。各キャラの `<キャラ英語説明>` は上の設定を英訳して差し込む（例: hero = "a cheerful teenage boy swordsman, short brown hair, traveler outfit, one-handed sword"）。
@@ -48,7 +49,7 @@ Consistent character across all cells, transparent background.
 ```
 A side-view battle sprite sheet for a 2D action JRPG (Tales of Eternia LMB style).
 Character: <hero or elder_youth, 上と同一デザイン>, facing RIGHT.
-LAYOUT: grid 2 rows x 4 columns (8 cells), evenly spaced, each cell 64x64 px.
+LEGACY LAYOUT: grid 2 rows x 4 columns (8 cells), evenly spaced, each cell 64x64 px.
 Cells in order: idle, step-forward, attack-1, attack-2, attack-3, guard, hurt, victory.
 [+ STYLE] [+ NEGATIVE]
 ```
@@ -57,7 +58,7 @@ Cells in order: idle, step-forward, attack-1, attack-2, attack-3, guard, hurt, v
 ```
 A side-view battle sprite sheet for a 2D action JRPG, Tales of Eternia style.
 Character: <childhood_girl or otherworld_girl, 上と同一デザイン>, facing RIGHT.
-LAYOUT: grid 2 rows x 4 columns (8 cells), evenly spaced, each cell 64x64 px.
+LEGACY LAYOUT: grid 2 rows x 4 columns (8 cells), evenly spaced, each cell 64x64 px.
 Cells in order: idle, step-forward, cast-charge, cast-release, staff-swing, guard, hurt, victory.
 [+ STYLE] [+ NEGATIVE]
 ```
@@ -147,7 +148,7 @@ Include: stone floor, stone wall, wooden door, treasure chest, torch, stairs.
 Seamless tileable. [+ STYLE] [+ NEGATIVE]
 ```
 
-### 3-4. バトル背景 (`battle_bg_field`)
+### 3-4. バトル背景 (`battle_bg_plains`)
 ```
 A side-scrolling battle background for a 2D JRPG, Tales of Eternia style.
 Grassy plain with distant hills and blue sky, horizontal 640x360, no characters.
@@ -208,5 +209,5 @@ transparent background, anime JRPG. [+ NEGATIVE]
 ## AssetManager 運用メモ
 - **セル数がプロンプト通りか必ず検品**。ズレたら列/行を指定し直すか単体生成→結合。
 - 生成物は `01_asset_list.md` の想定パスへ配置し、Godot import時 Filter=Off。
-- スプライトシートは Godot 側で `hframes`/`vframes`（例: 女戦士フィールド=hframes 4, vframes 4）で切り出す。
+- 旧プロンプトではスプライトシートをGodotの `hframes`/`vframes` で切り出す想定だった。現行のRoland/Wolfは、約124x124の個別PNGフレームをフォルダへ配置し、GDScriptが実行時に `SpriteFrames` を構築する。実フォルダ名は `Run`、`Guard`、`Parry`、`attack/Combo_01` 等の大文字小文字を厳密に維持する。
   この列数・行数を変えると Programmer 実装と食い違うので、変更時は必ず共有。

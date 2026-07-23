@@ -1,6 +1,7 @@
 # Tales-like JRPG 設計ドキュメント
 
-テイルズ オブ エターニア風 2D アクションRPG (Godot Engine 4.7 / 2D) の設計資料。
+テイルズ オブ エターニア風 2D アクションRPG (Godot Engine 4.7 feature target / 2D) の設計資料。
+プロジェクトのfeature設定は4.7だが、現行の検証環境はGodot 4.3。
 設計エージェント (GameDesigner) が作成し、各エージェントへ共有する起点となるドキュメント群。
 
 ## ドキュメント一覧
@@ -32,11 +33,14 @@ Roland Hartwell（主人公18/剣士）/ Fiona Merrick（幼馴染18/僧侶）/ 
 開始地点の町で育った幼馴染3人（Roland18男/Fiona18女/Gareth22男）が主軸。年上青年は18歳の頃に世界の異変に気付き単身旅立った。物語は空から降ってきた異世界の少女18を主人公が抱きとめて始まる。幼馴染女は年上青年に憧れつつ主人公への好意は未自覚、異世界の少女は主人公に恋する——という恋愛群像を背景に、少女の目的を果たす旅に出る。詳細は `00_game_design.md` §3。
 
 ## 現在地
-- **Phase 0 完了**: 町探索 + プレイヤー移動（プロトタイプ）。※旧warrior/priestのキャラ選択は廃止し新規4キャラで作り直す。
-- **Phase 1 (次の実装)**: `03_programmer_spec.md` を参照。Programmer へ依頼済み。
+- **旧Phase 0**: 町探索 + プレイヤー移動。warrior/priestのキャラ選択は廃止済み。
+- **現行実装**: `title.tscn → opening.tscn → EldenVillage.tscn`、Roland固定、EldenVillage 4画面、8方向FieldPlayer、敵シンボル、LMBSバトル拡張（3段コンボ/TECH/CAST/敵AI/Wolfアニメ/背景/報酬）、MenuScreen/CanvasLayerを実装済み。
+- **表示/環境**: viewportは640×360、初期ウィンドウは1280×720。project feature targetはGodot 4.7、検証環境はGodot 4.3。
+- **未接続**: EldenVillageからlegacy `field.tscn`/`main.tscn`への出口。Fiona/Selene/Garethのparty加入。
+- **将来**: 味方AI、作戦、アイテム/装備/セーブ、ダンジョン、ボス、追加演出。
 
 ## 各エージェントへの最初のタスク依頼
-- **Programmer**: `03_programmer_spec.md` の P1 (T1〜T6) を実装。着手前に §7 の確認事項を確認。
-- **AssetManager**: `01_asset_list.md` の P1優先素材（town/field tileset・battle背景・UI基本）を
+- **Programmer**: `03_programmer_spec.md` と現行コードの差分を同期し、未接続の将来機能を実装。
+- **AssetManager**: `01_asset_list.md` の現行不足素材（追加キャラクター、追加敵、追加背景、エフェクト）を
   `02_asset_prompts.md` のプロンプトで外部AI生成し、想定パスへ配置。
-- **Tester**: P1 の DoD（`03_programmer_spec.md` §8）に沿って一連フローを動作確認、バグ報告。
+- **Tester**: title→opening→EldenVillage、field→battle→field、メニュー、各Resource/アセットパスを確認し、未実装の将来項目と区別して報告。

@@ -15,7 +15,7 @@
 | --- | --- | --- |
 | Style | **pixel art, anime JRPG (Tales of Eternia風)** | 明るく彩度高め・太めの主線 |
 | View / 向き | **side view, facing right** | バトルは右向き基準（左は水平反転） |
-| Canvas size | **味方/雑魚 64x64、ボス 128x128、エフェクト 64x64** | セル固定。ズレるとGodot切り出しが破綻 |
+| Canvas size | **現行素材は約124x124（Roland/Wolf）**。旧案は味方/雑魚64x64、ボス128x128、エフェクト64x64 | 現行は個別PNGフレームを実行時にSpriteFramesへ登録 |
 | Directions | side（1方向でよい。歩きも左右のみ） | フィールド用は別途4/8方向 |
 | Background | **transparent** | 透過必須 |
 | Palette | ベースキャラの色を固定し全モーションで統一 | consistencyを最優先 |
@@ -52,7 +52,7 @@
 
 ## 2. モーション（Animate 用）— アクション別プロンプト
 
-各ベースキャラに対し、下記アクションを1つずつ生成（PixelLabの「action / animation description」に入れる）。
+各ベースキャラに対し、下記アクションを1つずつ生成（PixelLabの「action / animation description」に入れる）。下表は将来アセット要件を含む。
 フレーム数は目安（PixelLabのテンプレに合わせて調整可）。基準は**右向き**。
 
 ### 2.1 前衛（hero / elder_youth）
@@ -120,6 +120,7 @@ PixelLabで作れなければ通常の画像生成AIでも可。1行アニメ（
 - **同一キャラは同じベースから全モーションを生成**（絵柄・色ブレ防止）。PixelLabのキャラ複製→アニメ追加を活用。
 - セルサイズは §0 の値で固定。1シート化する場合は**等間隔グリッド**（列＝フレーム）にし、Godotで `hframes` を合わせる。
 - 基準向きは右。左向きは Godot 側で `flip_h`（別途生成しない）。
-- 出力パスは `01_asset_list.md` の想定に合わせる（例: `assets/characters/hero/battle/attack1.png` など。1アニメ1ファイル or 1キャラ1シート、運用を決めてProgrammerと共有）。
+- 現行の出力パスは `assets/characters/party/<id>/battle/animations/`。Rolandは `idle`、`Run`、`attack/Combo_01..03`、`Guard`、`Parry`、Wolfは `Idle`、`Run`、`Attack/Combo_01` を使用する。旧 `assets/characters/hero/*` は使用しない。
+- 現行は1アニメ1シートではなく、個別PNGフレームをフォルダへ配置し、GDScriptが実行時にSpriteFramesを構築する。`hframes`/`vframes`は使用しない。
 - 命名/セル数を変更したら**必ずProgrammerへ共有**（アニメ名・フレーム数がコードと一致している必要がある。`05_battle_system.md` §14 のアニメ名を正とする）。
 - PixelLab は API もあるため、量産する場合はキャラID×アクションのバッチ生成を検討（本ドキュメントのaction文をそのまま流用可）。

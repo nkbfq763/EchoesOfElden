@@ -5,7 +5,7 @@
 前提: `04_tales_reference.md`（エターニア分析）を踏まえた、テイルズ オブ エターニア風リアルタイム戦闘の詳細仕様。
 方針: Usage削減のためコードは最小限・データ駆動。段階実装（B1〜B5）でまず「戦闘の芯」を作る。
 
-> 現行P1バトル（`battle.tscn`：ui_acceptで1発殴るだけ）は本仕様で**全面的に作り直す**。
+> 現行バトルは本仕様の主要部分を実装済み。`battle.tscn`/`battle.gd`/`battle_unit.gd`にはリアルタイム移動、3段コンボ、TECH/CAST、ガード、ステップ、敵AI、報酬がある。味方AI、勝利演出、追加エフェクト、ボスAIは将来対応。
 
 ---
 
@@ -30,7 +30,7 @@
 ## 3. バトルの状態機械（全体）
 
 ```
-BATTLE_INTRO(登場演出) → ACTIVE(リアルタイム) → RESULT(勝敗)
+ACTIVE(リアルタイム) → RESULT(勝敗)
                               │
                     ┌─────────┴──────────┐
                 (勝利: 敵全滅)        (敗北: 味方全滅)
@@ -38,6 +38,7 @@ BATTLE_INTRO(登場演出) → ACTIVE(リアルタイム) → RESULT(勝敗)
               報酬→元マップ復帰        ゲームオーバー/直近セーブ
 ```
 
+- `BattleState` は `ACTIVE` / `RESULT`。`BATTLE_INTRO` は未実装。
 - `ACTIVE` 中は**時間が常に流れる**（ターン制ではない）。全ユニットが並行して行動。
 - ポーズ/メニュー（アイテム・術技選択）を開くと**時間停止**（P後半。B1は簡易でよい）。
 
@@ -48,9 +49,11 @@ BATTLE_INTRO(登場演出) → ACTIVE(リアルタイム) → RESULT(勝敗)
 各キャラ/敵は `BattleUnit`（味方/敵共通のノード or クラス）として下記ステートを持つ:
 
 ```
-IDLE ─ MOVE(前進/後退) ─ JUMP ─ ATTACK(1/2/3) ─ TECH(特技/奥義) ─ CAST(詠唱→発動) ─ GUARD ─ STEP(回避) ─ HURT(のけぞり) ─ DOWN(ダウン) ─ KO(戦闘不能) ─ VICTORY
+IDLE ─ MOVE(前進/後退) ─ JUMP ─ ATTACK1/2/3 ─ TECH ─ CAST ─ GUARD ─ STEP ─ HURT ─ DOWN ─ KO
 ```
 
+- 現在の`BattleUnit.State`は `IDLE, MOVE, JUMP, ATTACK1, ATTACK2, ATTACK3, TECH, CAST, GUARD, STEP, HURT, DOWN, KO`。
+- `VICTORY` は未実装。
 - 攻撃/技/詠唱中は**行動硬直**。硬直をステップや上位技で**キャンセル**できる余地を作る（連携の肝）。
 - `HURT` はヒットで発生。連続ヒットで**のけぞり継続（コンボを受ける）**。一定以上で `DOWN`。
 - `KO` = HP0。蘇生手段（術/アイテム）で復帰可（P後半）。
@@ -65,16 +68,15 @@ IDLE ─ MOVE(前進/後退) ─ JUMP ─ ATTACK(1/2/3) ─ TECH(特技/奥義) 
 | --- | --- | --- | --- | --- |
 | 移動 | 左右 (A/D, ←→) | 敵へ前進/後退。間合い調整 | - | いつでも |
 | ジャンプ | 上 or ジャンプ(Space) | 空中回避・空中攻撃の起点 | - | - |
-| 通常攻撃 | 攻撃(J / Enter) | 地上3段コンボ（1→2→3） | - | ステップ/特技でキャンセル可 |
-| 特技 | 特技(K)＋方向 | TP消費の技（例: 魔神剣＝飛び道具, 虎牙破斬＝突進） | TP | 通常攻撃から連携で派生 |
-| 奥義 | 特定コマンド | 上位技。特技から繋いで発動 | TP大 | - |
-| 術(アーツ) | 術(L)→選択 | 詠唱後に発動（範囲/属性）。詠唱中は無防備 | TP | 被弾で詠唱中断 |
-| ガード | ガード(長押し, U) | 前方被ダメージ軽減。TP微回復 | - | 解除は任意 |
-| ステップ | 回避(I)＋方向 | 前後に素早く回避。硬直キャンセル | - | 攻撃硬直をキャンセル |
-| 対象切替 | ターゲット(Tab/Q) | 攻撃対象の敵を切替 | - | - |
+| 通常攻撃 | `attack` (J) | 地上3段コンボ（1→2→3） | - | ステップ/特技でキャンセル可 |
+| 特技 | `tech` (U) | TP消費の近接技。通常攻撃から連携で派生 | TP | 通常攻撃から連携で派生 |
+| 術(アーツ) | `cast` (I) | 詠唱後に発動。詠唱中は無防備 | TP | 被弾で詠唱中断 |
+| ガード | `guard` (K)長押し | 前方被ダメージ軽減。TP微回復 | - | 解除は任意 |
+| ステップ | `step` (L) | 前後に素早く回避。硬直キャンセル | - | 攻撃硬直をキャンセル |
+| 対象切替 | `target_next` (Tab) | 攻撃対象の敵を切替 | - | - |
 | 操作キャラ切替 | (P後半) | パーティ内の操作キャラを変更 | - | - |
 
-> 入力割当は仮。`project.godot` の InputMap に `attack`/`tech`/`arte`/`guard`/`step`/`jump`/`target` を追加する。ゲームパッドにも割当（B1では最低限キーボード）。
+> 現在のInputMapは `attack`/`tech`/`cast`/`guard`/`step`/`jump`/`target_next`/`walk_mod`/`menu`。キーは順に J/U/I/K/L/Space/Tab/Shift/Escape・M。ゲームパッド対応は将来。
 
 ### 5.1 コンボ/連携ルール
 - 通常攻撃は最大3段。各段のヒット確認で次段が出る（空振りでも段は進む）。
@@ -100,18 +102,18 @@ base   = attacker.attack * skill_power
 raw    = base - defender.defense
 elem   = raw * element_multiplier          # 弱点1.5 / 半減0.5 / 無効0 / 等倍1.0
 combo  = elem * (1 + min(combo_hits * 0.01, 0.3))   # 連携補正 上限+30%
-damage = max(1, floor(combo)) ± 軽い乱数(±5%)
+damage = max(1, floor(combo) + randi_range(-5, 5))
 ```
 
 - `skill_power`: 通常=1.0、特技/奥義/術ごとに係数（`SkillData.power`）。
-- 属性: `fire/water/wind/earth/light/dark/none`。敵ごとに弱点/耐性を持つ（`EnemyData`）。
+- 属性: 現在は `none/fire/ice/lightning`。`water/wind/earth/light/dark` と敵ごとの弱点/耐性は将来対応。
 - クリティカル（P後半, 任意）: 一定確率で1.5倍。
 
 ---
 
 ## 8. 敵AI
 
-- 状態: `APPROACH(接近) → ATTACK(攻撃) → RECOVER(後隙) → REPOSITION(再配置)` を巡回。
+- 状態: `APPROACH(接近) → TELEGRAPH(予備動作) → ATTACK(攻撃) → RECOVER(後隙) → REPOSITION(再配置)` を巡回。
 - **テレグラフ**: 攻撃前に短い予備動作（アニメ/エフェクト）を挟み、プレイヤーがガード/回避で反応できるようにする。
 - 種類で挙動差: 近接（突進して殴る）、遠隔（距離を取って撃つ）、術（詠唱してから範囲）。
 - 難度: `EnemyData` に `attack_interval` / `aggression` 等を持たせデータで調整。
@@ -186,4 +188,4 @@ damage = max(1, floor(combo)) ± 軽い乱数(±5%)
 ### 14.4 エフェクト（キャラ非依存）
 `slash, hit_spark, guard_spark, heal, cast_circle, 属性術(fire/water/wind/earth/light/dark)`
 
-> 規格（推奨）: 味方=64x64セル、雑魚敵=64x64、ボス=128x128、エフェクト=64x64。基準向きは**右向き**（左は水平反転）。ピクセルパーフェクト表示のため import Filter=Off。
+> 現行のRoland/Wolf入力素材は約124x124の個別PNGフレームで、表示時におおむね`scale=0.4`を適用する。64x64/128x128セル、専用hit/death/victory素材、エフェクトは将来の生成要件。基準向きは**右向き**（左は水平反転）。
