@@ -10,6 +10,8 @@
 
 \## 1. カラー仕様（マスク画像）
 
+以下の赤/青/黒/緑の対応は将来のカテゴリ分類仕様である。現行実装はオブジェクト単位マスクの近黒Solid判定のみを使用する。
+
 
 
 \### 1.1 色と機能カテゴリの対応
@@ -40,23 +42,22 @@
 
 \### 2.1 入力画像
 
-\- 元画像: `elden\_village\_objects.png`  
-
-\- マスク画像: `elden\_village\_objects\_mask.png`
+\- 背景/オブジェクト/マスクは `assets/maps/settlements/s001_elden_village/{background,objects,masks,meta}/` に分割配置する。
+\- 各画面のJSONが `object_ref` と `mask_ref` を指定する。
 
 
 
 \### 2.2 抽出アルゴリズム
 
-1\. 非透明ピクセルを flood-fill  
+1\. 各オブジェクトの `mask_ref` を読み込む
 
 2\. 1px の途切れは dilation で補正  
 
 3\. 塊ごとに bounding box を算出  
 
-4\. 元画像を矩形で切り出し `object\_N.png`  
+4\. オブジェクト画像を `object_ref` からロード
 
-5\. マスク画像も同じ矩形で切り出し `object\_N\_mask.png`  
+5\. マスク画像を `mask_ref` からロード
 
 6\. 塊ピクセルのみ visited に登録  
 
@@ -74,17 +75,17 @@
 
 \### 3.1 マスク画像の走査
 
-各ピクセルを走査し、以下を判定:
+将来のカテゴリ分類では各ピクセルを走査し、以下を判定する。現在の実装では赤/青/緑は判定しない。
 
 
 
-\- 赤 → `has\_overhang = true`
+\- 赤 → `has\_overhang = true`（将来）
 
-\- 青 → `has\_sidestructure = true`
+\- 青 → `has\_sidestructure = true`（将来）
 
-\- 緑 → `has\_walkable = true`
+\- 緑 → `has\_walkable = true`（将来）
 
-\- 黒 → `has\_solid = true`
+\- 黒 → `has\_solid = true`（現在実装）
 
 
 
@@ -110,11 +111,11 @@
 
 \### 4.1 Solid の扱い
 
-\- 黒（Solid）がある部分は必ず通れない  
+\- 現在は、不透明な近黒ピクセル（alpha >= 0.5、red/green/blue <= 0.2）のみSolidとして扱う。
 
 \- Solid 部分から `CollisionPolygon2D` を生成  
 
-\- Overhang / SideStructure / Walkable は黒がなければ衝突なし
+\- 赤/青/緑のカテゴリによる追加判定は未実装。
 
 
 
@@ -126,13 +127,11 @@
 
 |----------|--------|--------|
 
-| Overhang | 通れる | なし |
+| 近黒Solid | 通れない | あり |
 
-| SideStructure | 黒がなければ通れる | 黒があれば通れない |
+| その他の色/透明 | 通れる | なし |
 
-| Solid | 通れない | あり |
-
-| Walkable | 通れる | なし |
+Overhang / SideStructure / Walkableの意味付けは将来拡張。
 
 
 
@@ -180,7 +179,7 @@ Overhang / SideStructure / Solid / Walkable
 
 
 
-\### Overhang（頭上構造 / 通行可能）
+\### Overhang（頭上構造 / 将来カテゴリ）
 
 \- キャラは下を通れる  
 
@@ -194,7 +193,7 @@ Overhang / SideStructure / Solid / Walkable
 
 
 
-\### SideStructure（側面構造 / 通行可否は黒次第）
+\### SideStructure（側面構造 / 将来カテゴリ）
 
 \- キャラが後ろに行くと隠れる  
 
@@ -206,7 +205,7 @@ Overhang / SideStructure / Solid / Walkable
 
 
 
-\### Solid（物理障害物 / 通れない）
+\### Solid（物理障害物 / 現行実装）
 
 \- 黒部分は必ず通れない  
 
@@ -216,7 +215,7 @@ Overhang / SideStructure / Solid / Walkable
 
 
 
-\### Walkable（地面 / 通行可能）
+\### Walkable（地面 / 将来カテゴリ）
 
 \- 常に通れる  
 
@@ -238,21 +237,21 @@ Overhang / SideStructure / Solid / Walkable
 
 {
 
-&#x20; "id": 12,
+&#x20; "id": "house_a",
 
-&#x20; "rect": { "x": 100, "y": 200, "w": 64, "h": 48 },
+&#x20; "object_ref": "res://assets/maps/settlements/s001_elden_village/objects/house_a.png",
 
-&#x20; "category": "SideStructure",
+&#x20; "mask_ref": "res://assets/maps/settlements/s001_elden_village/masks/house_a_mask.png",
 
-&#x20; "has\_overhang": false,
+&#x20; "position": { "x": 370, "y": 175 },
 
-&#x20; "has\_sidestructure": true,
+&#x20; "scale": 0.5,
 
-&#x20; "has\_walkable": false,
+&#x20; "collision": true,
 
-&#x20; "has\_solid": true
+&#x20; "category": "SolidOnly"
 
 }
+```
 
-
-
+固定`z_index`や`has_overhang`等のカテゴリフラグは現行JSONには存在しない。z-indexはスプライトの足元Yから実行時に算出する。

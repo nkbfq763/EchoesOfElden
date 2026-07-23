@@ -45,7 +45,7 @@ Each layer on transparent background, seamless left-right tiling.
 
 ## 1. バイオメ別パターン（world/mapに対応）
 
-各項目の英文を「共通スタイル＋共通ネガティブ」に挟んで投入。`res://assets/backgrounds/` へ配置想定。
+各項目の英文を「共通スタイル＋共通ネガティブ」に挟んで投入。現行は `res://assets/maps/battle_maps/` へ単層PNGとして配置する。
 
 ### 1-1. 草原/平原 (`battle_bg_plains`) ※フィールド標準
 ```
@@ -131,6 +131,8 @@ runes, tense atmosphere. (still: open center, no characters)
 - まず**フィールド標準の `battle_bg_plains` を最優先**（B1テスト用）。次いで forest / cave / boss。
 - 640x360の単層1枚から開始。横スクロール/パララックスは必要になってから多層出力。
 - 中央帯を開けること（キャラが被ると視認性が落ちる）。生成物が中央を埋めていたら再生成 or 端に寄せる指示を追加。
-- 命名は `battle_bg_<biome>[_<variant>].png`、配置は `res://assets/backgrounds/`。パララックス層は `_far/_mid/_near` サフィックス。
+- 命名は `battle_bg_<biome>[_<variant>].png`、配置は `res://assets/maps/battle_maps/`。現行は単層PNGで、パララックス層は将来対応。
+- バトル開始時の背景選択は `EnemyData.battle_bg` → `GameData.battle_background` → `battle_bg_plains.png` の順。
+- 現在実在する背景は `cave/forest/mountain/plains/ruins/snow`。`town/desert/swamp/castle/boss` は将来追加。
 - `01_asset_list.md` の `battle_bg_field` は本書の `battle_bg_plains` に統合（同一用途）。変更時はProgrammerへ共有。
 - Godot import は（ピクセル調なら）Filter=Off、滑らかな絵なら Filter=On を素材の描き方に合わせて選択。

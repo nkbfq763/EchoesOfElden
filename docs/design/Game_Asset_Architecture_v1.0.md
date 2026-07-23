@@ -296,9 +296,7 @@ field/
 
 &#x20;  ├─ idle/
 
-&#x20;  ├─ walk/
-
-&#x20;  └─ run/
+&#x20;  └─ Run/
 
 ```
 
@@ -318,13 +316,10 @@ Single frame.
 
 ```text
 
-idle/east.png
+idle/<direction>.png
 
-idle/north.png
-
-idle/west.png
-
-idle/south.png
+（現在は8方向: east / north-east / north / north-west /
+west / south-west / south / south-east）
 
 ```
 
@@ -334,15 +329,15 @@ idle/south.png
 
 
 
-\## walk
+\## Run
 
 
 
 ```text
 
-walk/east/frame\_000.png
+Run/east/frame\_000.png
 
-walk/east/frame\_001.png
+Run/east/frame\_001.png
 
 ```
 
@@ -358,9 +353,9 @@ walk/east/frame\_001.png
 
 ```text
 
-run/east/frame\_000.png
+Run/east/frame\_000.png
 
-run/east/frame\_001.png
+Run/east/frame\_001.png
 
 ```
 
@@ -416,17 +411,15 @@ battle/
 
 &#x20;  ├─ idle/
 
-&#x20;  ├─ run/
+&#x20;  ├─ Run/
 
-&#x20;  ├─ attack/
+&#x20;  ├─ attack/Combo\_01..03/
 
-&#x20;  ├─ guard/
+&#x20;  ├─ Guard/
 
-&#x20;  ├─ parry/
+&#x20;  ├─ Parry/
 
-&#x20;  ├─ hit/
-
-&#x20;  └─ death/
+&#x20;  └─ rotations/
 
 ```
 
@@ -446,11 +439,11 @@ attack/
 
 
 
-├─ combo\_01/
+├─ Combo\_01/
 
-├─ combo\_02/
+├─ Combo\_02/
 
-└─ combo\_03/
+└─ Combo\_03/
 
 ```
 
@@ -462,17 +455,19 @@ Example:
 
 ```text
 
-attack/combo\_01/frame\_000.png
+attack/Combo\_01/frame\_000.png
 
-attack/combo\_02/frame\_000.png
+attack/Combo\_02/frame\_000.png
 
-attack/combo\_03/frame\_000.png
+attack/Combo\_03/frame\_000.png
 
 ```
 
 
 
-AnimationTree state names must exactly match folder paths.
+現行実装はAnimationTreeではなく、個別PNGフレームをGDScriptで実行時に`SpriteFrames`へ登録する。
+入力素材はRoland/Wolfとも約124x124で、表示時におおむね`scale=0.4`を適用する。
+`hit`/`death`等の専用素材は未実装で、現在はidle等へフォールバックする。
 
 
 
@@ -490,19 +485,13 @@ portrait/
 
 
 
-├─ angry.png
-
-├─ smile.png
-
-├─ laugh.png
-
-└─ neutral.png
+（Roland/Fiona等の顔画像。メニューの表示画像とCrop領域は`data/portrait_config.json`で指定）
 
 ```
 
 
 
-File name equals expression name.
+File名は素材ごとの表情名を使用する。メニューは現在`common_face.png`のCrop領域を使用する。
 
 
 
@@ -513,6 +502,9 @@ File name equals expression name.
 \# 8. Character Metadata
 
 
+
+現行実装ではCharacter用meta JSONは未使用。表示スケール/offsetはGDScript、敵のアニメーションパスと背景は`EnemyData`、ポートレートは`data/portrait_config.json`で管理する。
+以下は将来のデータ駆動化案である。
 
 File:
 
@@ -774,7 +766,7 @@ dungeons/
 
 
 
-├─ graphics/
+├─ background/
 
 │
 
@@ -782,7 +774,7 @@ dungeons/
 
 │
 
-├─ entrances/
+├─ masks/
 
 │
 
@@ -798,37 +790,47 @@ Example:
 
 ```text
 
-w001\_elden\_region/
+s001\_elden\_village/
 
 
 
-├─ graphics/
+├─ background/
 
-│   └─ map.png
+│   ├─ bg\_screen\_a.png
+
+│   ├─ bg\_screen\_b.png
+
+│   ├─ bg\_screen\_c.png
+
+│   └─ bg\_screen\_d.png
 
 │
 
 ├─ objects/
 
-│   └─ w001\_objects.json
+│   └─ <object>.png
 
 │
 
-├─ entrances/
+├─ masks/
 
-│   ├─ w001\_enter\_s001.json
-
-│   └─ w001\_enter\_d001.json
+│   └─ <object>\_mask.png
 
 │
 
 └─ meta/
 
-&#x20;   ├─ w001\_meta.json
+&#x20;   ├─ bg\_screen\_a.json
 
-&#x20;   └─ w001\_walkable.png
+&#x20;   ├─ bg\_screen\_b.json
+
+&#x20;   ├─ bg\_screen\_c.json
+
+&#x20;   └─ bg\_screen\_d.json
 
 ```
+
+画面JSONのオブジェクト要素は `id`、`object_ref`、`mask_ref`、`position`、`scale`、`collision`、`category` を持つ。固定`z_index`やカテゴリフラグは現行実装では持たず、z-indexは足元Yから実行時に算出する。
 
 
 
@@ -890,29 +892,14 @@ r001\_entrance/
 
 ```text
 
-b001\_forest/
+assets/maps/battle\_maps/
 
 
 
-├─ bg/
+└─ battle\_bg\_<biome>.png
 
-│   ├─ back.png
+（現在は単層PNG。多層bg、positions.json、walkable、metaは将来案）
 
-│   ├─ middle.png
-
-│   └─ front.png
-
-│
-
-├─ positions.json
-
-│
-
-├─ b001\_walkable.png
-
-│
-
-└─ b001\_meta.json
 
 ```
 
@@ -926,7 +913,7 @@ b001\_forest/
 
 
 
-Required for all maps.
+旧アーキテクチャでは全マップ必須としていたが、現行EldenVillageではオブジェクト単位マスクを使用する。
 
 
 
@@ -942,11 +929,9 @@ Color meaning:
 
 \*```text
 
-White = Walkable
+不透明な近黒ピクセル（alpha >= 0.5 かつ RGB <= 0.2） = Solid
 
-
-
-Black =\*Blocked
+その他の色 = 現在はカテゴリ判定しない
 
 ```
 
@@ -956,13 +941,7 @@ Used by:
 
 
 
-\- player\*navigation\*- NPC movement
-
-\- enemy movement
-
-\- \*ollision generation
-
-\- battle posit\*oning
+\- EldenVillageの`CollisionPolygon2D`生成
 
 
 
@@ -972,11 +951,9 @@ Used by:
 
 \# 14. Encounter System\*
 
-Folder\*structure\*must never determine encounters.
-
-
-
-\*ncounters are controlled only thro\*gh metadata.
+現行のエンカウントはフォルダ構造やマップメタデータではなく、`field.tscn`内のArea2D敵シンボル接触で決定する。
+敵データは`GameData.pending_encounter`を経由してbattleへ渡す。
+メタデータ制御のランダムエンカウントは将来案。
 
 
 
@@ -984,7 +961,7 @@ Folder\*structure\*must never determine encounters.
 
 
 
-\## Encounter En\*bled
+\## Encounter Enabled（将来のメタデータ案）
 
 
 
@@ -1004,7 +981,7 @@ Folder\*structure\*must never determine encounters.
 
 
 
-\## No Encount\*r
+\## No Encounter（将来のメタデータ案）
 
 
 
@@ -1024,7 +1001,7 @@ Folder\*structure\*must never determine encounters.
 
 
 
-\## World Exampl\*
+\## World Example（将来のメタデータ案）
 
 
 
@@ -1580,25 +1557,24 @@ The follow\*ng principles are mandatory:
 
 
 
-\- Fo\*der structure defines content cate\*ory
+\- Folder structure defines content category（現行/将来共通）
 
-\- Metadata defines game behavi\*r
+\- Metadata defines game behavior（EldenVillageの現行JSONを含む）
 
-\- Encounters are controlled by m\*tadata only
+\- Encounters are currently controlled by Area2D enemy symbols; metadata-only encounters are future
 
-\- AnimationTree states\*must match folder paths
+\- Animation states are currently built as runtime `SpriteFrames`; AnimationTree is future
 
-\- All plac\*ments are JSON driven
+\- EldenVillage placements are JSON driven
 
-\- All reusab\*e objects are prefabs
+\- Reusable objects are prefabs where applicable
 
-\- All maps r\*quire walkable masks
+\- Whole-map walkable masks are legacy/future; current collision uses object masks
 
-\- Devin must \*e able to construct content withou\* hardcoded assets
+\- New content should avoid hardcoded assets
 
-\- New content must never require changing the architecture
+\- New content should not require changing the architecture
 
 
 
 This document is the official asset architecture specification for the project.
-
